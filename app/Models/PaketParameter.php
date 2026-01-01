@@ -13,6 +13,8 @@ class PaketParameter extends Model
         'parameter' => 'array',
     ];
 
+    public $timestamps = false;
+
     public function regulasi(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Regulasi::class, 'id_regulasi');

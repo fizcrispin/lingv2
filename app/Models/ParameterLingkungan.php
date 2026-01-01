@@ -17,6 +17,8 @@ class ParameterLingkungan extends Model
         // ... kolom lainnya
     ];
 
+    public $timestamps = false;
+
 
     // public function getParameterAttribute($value)
     // {
@@ -37,6 +39,11 @@ class ParameterLingkungan extends Model
     public function kategoriData(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Kategori::class, 'kategori');
+    }
+
+    public function regulasi(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Regulasi::class, 'id_regulasi');
     }
 }
 

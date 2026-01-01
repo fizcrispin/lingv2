@@ -8,4 +8,5 @@ class Kategori extends Model
 {
     protected $table = 'Kategori';
     protected $guarded = [];
+    public $timestamps = false;
 }

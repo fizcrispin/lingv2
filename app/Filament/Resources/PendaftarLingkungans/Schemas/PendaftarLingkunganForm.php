@@ -20,7 +20,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextInputColumn;
-use Carbon\Carbon;
+
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Components\Utilities\Get;
@@ -105,12 +105,10 @@ class PendaftarLingkunganForm
 
                     DatePicker::make('tanggal_pendaftar')
                         ->label('Tanggal Pendaftaran')
-                        ->default(now())
                         ->required()
-                        ->native(false)
-                        ->displayFormat('d/m/Y')
+                        ->default(now())
                         ->extraAttributes(fn (Get $get) => [
-                            'title' => 'Tanggal: ' . ($get('tanggal_pendaftar') ? \Carbon\Carbon::parse($get('tanggal_pendaftar'))->format('d/m/Y') : now()->format('d/m/Y')),
+                            'title' => 'Tanggal: ' . ($get('tanggal_pendaftar') ? date('d/m/Y', strtotime($get('tanggal_pendaftar'))) : date('d/m/Y')),
                         ]),
 
                     TextInput::make('no_hp')
@@ -165,10 +163,8 @@ class PendaftarLingkunganForm
                     DatePicker::make('tanggal_sampling')
                         ->label('Tanggal Sampling')
                         ->default(now())
-                        ->native(false)
-                        ->displayFormat('d/m/Y')
                         ->extraAttributes(fn (Get $get) => [
-                            'title' => 'Tanggal: ' . ($get('tanggal_sampling') ? \Carbon\Carbon::parse($get('tanggal_sampling'))->format('d/m/Y') : now()->format('d/m/Y')),
+                            'title' => 'Tanggal: ' . ($get('tanggal_sampling') ? date('d/m/Y', strtotime($get('tanggal_sampling'))) : date('d/m/Y')),
                         ]),
 
                     TextInput::make('petugas_sampling')

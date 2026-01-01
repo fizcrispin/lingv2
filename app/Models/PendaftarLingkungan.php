@@ -16,6 +16,16 @@ class PendaftarLingkungan extends Model
 
     protected static function booted()
     {
+        static::created(function ($model) {
+             $model->ekspedisi()->create([
+                 'no_pendaftar' => $model->no_pendaftar,
+             ]);
+        });
+
+        static::deleting(function ($model) {
+            $model->ekspedisi()->delete();
+        });
+
         static::saving(function ($model) {
             // Pastikan parameter dalam bentuk array (tidak integer atau string)
             if (is_string($model->parameter)) {
@@ -31,6 +41,11 @@ class PendaftarLingkungan extends Model
                 $model->parameter = is_array($model->parameter) ? array_map('intval', $model->parameter) : [];
             }
         });
+    }
+
+    public function ekspedisi(): HasOne
+    {
+        return $this->hasOne(Ekspedisi::class, 'no_pendaftar', 'no_pendaftar');
     }
 
 
@@ -219,9 +234,6 @@ class PendaftarLingkungan extends Model
                 'id_parameter' => $paramId,
                 'nama_parameter' => $paramModel ? $paramModel->nama_parameter : null,
                 'hasil_parameter' => null, // default
-                // 'metode_analisa' => null, // bisa diisi default dari master parameter jika ada columns
-                // 'status' => 'Menunggu',
-                // 'tanggal_input' => now(), // Opsional
             ];
         }
 

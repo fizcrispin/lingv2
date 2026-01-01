@@ -8,4 +8,5 @@ class Regulasi extends Model
 {
     protected $table = 'regulasi';
     protected $guarded = [];
+    public $timestamps = false;
 }

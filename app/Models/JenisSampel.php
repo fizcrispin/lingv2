@@ -25,7 +25,8 @@ class JenisSampel extends Model
     // Tambahkan kolom-kolom yang ada di tabel 'jenis_sampel'
     protected $fillable = [
         'nama_sampel',
-        'kode',
-        // ... kolom lainnya
+        'kode_sampel',
     ];
+
+    public $timestamps = false;
 }

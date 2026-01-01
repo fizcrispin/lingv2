@@ -31,8 +31,15 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Lab Management Sys')
-            ->sidebarCollapsibleOnDesktop()
+            ->brandName('LabKes Sragen')
+            ->sidebarCollapsibleOnDesktop(true)
+            ->navigationGroups([
+                'Operasional',
+                'Keuangan',
+                'Master Data',
+                'Laporan',
+                'Pengaturan',
+            ])
             ->maxContentWidth('85%')
             ->colors([
                 'primary' => Color::Teal,

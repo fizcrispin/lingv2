@@ -37,7 +37,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
-use App\Models\ParameterLingkungan;
+
 use Filament\Forms\Components\Toggle;
 use App\Models\PaketParameter;
 use Filament\Forms\Components\Grid;
@@ -54,7 +54,13 @@ class PendaftarLingkunganResource extends Resource
 {
     protected static ?string $model = PendaftarLingkungan::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-plus';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Operasional';
+    
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $navigationLabel = 'Pendaftaran';
 
     protected static ?string $recordTitleAttribute = 'PendaftarLingkungan';
 
