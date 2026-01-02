@@ -23,6 +23,6 @@ class InvoiceLingkungan extends Model
      */
     public function pendaftar(): BelongsTo
     {
-        return $this->belongsTo(PendaftarLingkungan::class, 'id_pendaftar');
+        return $this->belongsTo(PendaftarLingkungan::class, 'id_pendaftar', 'no_pendaftar');
     }
 }

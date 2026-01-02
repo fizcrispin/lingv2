@@ -24,6 +24,8 @@ class PendaftarLingkungan extends Model
 
         static::deleting(function ($model) {
             $model->ekspedisi()->delete();
+            $model->invoice()->delete(); // Hapus Invoice (Transaksi)
+            $model->hasilLingkungans()->delete(); // Hapus Hasil Lab
         });
 
         static::saving(function ($model) {
@@ -88,7 +90,7 @@ class PendaftarLingkungan extends Model
      */
     public function invoice(): HasOne
     {
-        return $this->hasOne(InvoiceLingkungan::class, 'id_pendaftar');
+        return $this->hasOne(InvoiceLingkungan::class, 'id_pendaftar', 'no_pendaftar');
     }
 
     /**

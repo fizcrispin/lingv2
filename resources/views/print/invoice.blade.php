@@ -4,144 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title }} - {{ $record->pendaftar->no_pendaftar ?? 'Transaksi' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #333; line-height: 1.5; margin: 0; padding: 20px; background: #f4f4f4; }
-        .no-print-wrapper { text-align: center; margin-bottom: 20px; }
-        .container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 40px; background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .header { display: flex; justify-content: space-between; border-bottom: 3px solid #0d9488; padding-bottom: 15px; margin-bottom: 25px; }
-        .logo-area h1 { margin: 0; font-size: 26px; color: #0d9488; letter-spacing: -0.5px; }
-        .logo-area p { margin: 2px 0; font-size: 11px; color: #666; text-transform: uppercase; }
-        .doc-title { text-align: right; }
-        .doc-title h2 { margin: 0; font-size: 22px; text-transform: uppercase; color: #111; }
-        .doc-title p { margin: 2px 0; font-size: 13px; color: #444; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 35px; }
-        .info-block h4 { margin: 0 0 12px 0; border-bottom: 1px solid #eee; padding-bottom: 6px; font-size: 13px; text-transform: uppercase; color: #0d9488; }
-        .info-block p { margin: 4px 0; font-size: 13px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th { background: #f8fafc; text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; font-size: 12px; text-transform: uppercase; color: #64748b; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-        .text-right { text-align: right; }
-        .total-area { text-align: right; margin-top: 20px; border-top: 2px solid #0d9488; padding-top: 15px; }
-        .total-row { display: flex; justify-content: flex-end; gap: 40px; margin-bottom: 5px; font-size: 14px; }
-        .total-label { color: #64748b; }
-        .total-value { font-weight: bold; width: 150px; }
-        .grand-total { font-size: 18px; color: #0d9488; margin-top: 10px; }
-        .footer { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; text-align: center; }
-        .signature { height: 90px; }
-        @media print {
-            body { padding: 0; background: white; }
-            .container { border: none; box-shadow: none; max-width: 100%; }
-            .no-print-wrapper { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            color: black; 
+            background: white; 
+            -webkit-print-color-adjust: exact; 
+            font-size: 12pt;
         }
-        .btn-print { background: #0d9488; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s; }
-        .btn-print:hover { background: #0f766e; }
+
+        .no-print-wrapper { 
+            text-align: center; 
+            margin-bottom: 20px; 
+        }
+
+        @media print {
+            .no-print-wrapper { 
+                display: none; 
+            }
+
+            body { 
+                padding: 0; 
+                margin: 0; 
+            }
+
+            @page { 
+                margin: 1cm; 
+                size: auto; 
+            }
+        }
     </style>
 </head>
-<body>
-    <div class="no-print-wrapper">
-        <button class="btn-print" onclick="window.print()">Cetak Dokumen Sekarang</button>
+<body class="p-8 bg-gray-100">
+    <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Dokumen</button>
+        <button class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 font-sans" onclick="window.close()">Tutup</button>
     </div>
 
-    @if($record->pendaftar)
-    <div class="container">
-        <div class="header">
-            <div class="logo-area">
-                <h1>LABORATORIUM LINGKUNGAN</h1>
-                <p>Unit Pelaksana Teknis Laboratorium Lingkungan</p>
-                <p>Jl. Contoh Alamat No. 123, Kota, Indonesia</p>
-                <p>Telp: (021) 12345678 | Email: lab@contoh.com</p>
-            </div>
-            <div class="doc-title">
-                <h2>{{ $title }}</h2>
-                <p><strong>#{{ $record->pendaftar->no_pendaftar }}</strong></p>
-                <p>{{ $record->tanggal_tagihan?->format('d/m/Y') ?? now()->format('d/m/Y') }}</p>
+    <div id="print" class="max-w-[210mm] mx-auto bg-white">
+        <!-- HEADER (Common) -->
+        <div class="relative border-b-[3px] border-black pb-4 mb-5">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Seal_of_Sragen_Regency.svg/250px-Seal_of_Sragen_Regency.svg.png" alt="Logo" class="absolute left-1 top-0 h-[80px] object-contain">
+            <div class="w-full text-center">
+                <h5 class="uppercase font-bold text-sm mb-[2px] leading-tight">Pemerintah Kabupaten Sragen</h5>
+                <h5 class="uppercase font-bold text-sm mb-[2px] leading-tight">Dinas Kesehatan</h5>
+                <h4 class="font-bold text-base mb-[2px] leading-tight">UPTD LABORATORIUM KESEHATAN</h4>
+                <small class="block text-xs leading-tight">Jalan Jend. Ahmad Yani, Sragen, Jawa Tengah 57216</small>
+                <small class="block text-xs leading-tight">Telepon (0271) 891078, Laman labkesda.sragenkab.go.id, Pos-el labkesda.sragen@gmail.com</small>
             </div>
         </div>
 
-        <div class="info-grid">
-            <div class="info-block">
-                <h4>Pelanggan / Pengirim:</h4>
-                <p><strong>{{ $record->pendaftar->nama_pengirim }}</strong></p>
-                <p>{{ $record->pendaftar->titik_sampling }}</p>
-                <p>Sampel: {{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}</p>
+        @if(isset($type) && $type === 'kuitansi')
+        <!-- KUITANSI LAYOUT -->
+        <div class="text-center py-2 mb-6">
+            <h5 class="underline uppercase font-bold tracking-[5px] text-lg">KUITANSI</h5>
+        </div>
+
+        <div class="px-5 text-xs">
+             <!-- Nomor -->
+            <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Nomor</span><span>:</span></div>
+                <div class="w-9/12">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/F/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
             </div>
-            <div class="info-block">
-                <h4>Informasi Pembayaran:</h4>
-                <p>Status: <strong style="color: {{ $record->status_bayar === 2 ? '#059669' : '#dc2626' }}">
-                    @if($record->status_bayar === 0) DRAFT 
-                    @elseif($record->status_bayar === 1) MENUNGGU PEMBAYARAN 
-                    @elseif($record->status_bayar === 2) LUNAS 
-                    @else STATUS: {{ $record->status_bayar }} @endif
-                </strong></p>
-                @if($record->tanggal_bayar)
-                    <p>Tgl Pelunasan: {{ $record->tanggal_bayar->format('d/m/Y') }}</p>
-                @endif
-                @if($record->metode_pembayaran)
-                    <p>Metode: {{ $record->metode_pembayaran }}</p>
-                @endif
-                @if($record->kode_ver)
-                    <p>Ref: {{ $record->kode_ver }}</p>
-                @endif
+
+            <!-- Tanggal Pendaftaran -->
+            <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Tanggal Pendaftaran</span><span>:</span></div>
+                <div class="w-9/12">
+                    {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('d/m/Y') : '-' }}
+                </div>
+            </div>
+
+            <!-- Telah Diterima Dari -->
+            <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Telah diterima dari</span><span>:</span></div>
+                <div class="w-9/12 uppercase font-bold">
+                    {{ $record->pendaftar->nama_pengirim ?? '-' }}
+                </div>
+            </div>
+
+             <!-- Pembayaran Untuk -->
+             <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Untuk Pembayaran</span><span>:</span></div>
+                <div class="w-9/12">
+                    Pemeriksaan Sampel {{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}
+                </div>
+            </div>
+
+            <!-- Sejumlah Uang -->
+            <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Sejumlah Uang</span><span>:</span></div>
+                <div class="w-9/12 font-bold">
+                   Rp {{ number_format($record->total_harga ?? 0, 0, ',', '.') }}
+                </div>
+            </div>
+
+            <!-- Terbilang -->
+             <div class="flex mb-2 text-xs">
+                <div class="w-3/12 flex justify-between pr-4"><span>Terbilang</span><span>:</span></div>
+                <div class="w-9/12 font-bold italic capitalize">
+                   <span class="bg-gray-100 p-1 rounded inline-block"># {{ $terbilang ?? '-' }} #</span>
+                </div>
             </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 50px;">No</th>
-                    <th>Parameter Pengujian</th>
-                    <th class="text-right">Biaya (IDR)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($parameters as $index => $param)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $param->nama_parameter }}</td>
-                    <td class="text-right">{{ number_format($param->harga_parameter, 0, ',', '.') }}</td>
-                </tr>
-                @endforeach
-                @if($parameters->isEmpty())
-                <tr>
-                    <td colspan="3" style="text-align: center; color: #94a3b8; font-style: italic;">Tidak ada rincian parameter</td>
-                </tr>
-                @endif
-            </tbody>
-        </table>
+        <!-- Footer Kuitansi -->
+         <div class="mt-8 pt-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div></div>
+                <div class="text-center text-xs">
+                    <p class="mb-4">Sragen, {{ $record->tanggal_bayar ? $record->tanggal_bayar->locale('id')->translatedFormat('d F Y') : 'Belum Bayar' }}</p>
+                </div>
+            </div>
 
-        <div class="total-area">
-            <div class="total-row">
-                <span class="total-label">Subtotal</span>
-                <span class="total-value">{{ number_format($record->total_harga, 0, ',', '.') }}</span>
+            <div class="text-center text-xs grid grid-cols-2 gap-8">
+                <!-- Left Sig -->
+                <div>
+                     <p>Mengetahui</p>
+                     <p class="mb-16">Bendahara Penerimaan BLUD</p>
+                     <p class="font-bold underline">MEITA KINANTHI, A.Md.</p>
+                     <p>NIP. 19950523 202421 2 028</p>
+                </div>
+
+                <!-- Right Sig -->
+                <div>
+                    <p>&nbsp;</p>
+                    <p class="mb-16">Penerima</p>
+                    <p class="font-bold border-b border-black inline-block min-w-[150px]">&nbsp;</p>
+               </div>
             </div>
-            <div class="total-row">
-                <span class="total-label">Sudah Dibayar</span>
-                <span class="total-value">{{ number_format($record->total_bayar, 0, ',', '.') }}</span>
+         </div>
+
+        @else
+        <!-- FAKTUR PENAGIHAN LAYOUT -->
+        <div class="text-center py-2 mb-6">
+            <h5 class="underline uppercase font-bold tracking-[5px] text-lg">FAKTUR</h5>
+        </div>
+
+        <!-- INFO SECTION -->
+        <div class="flex flex-wrap -mx-2 mb-6 text-xs">
+            <!-- Left Column: Sender Info -->
+            <div class="w-7/12 px-2">
+                <div class="w-10/12">
+                    <span class="block text-xs mb-1">Kepada Yth:</span>
+                    <div class="flex justify-between mb-1">
+                        <span class="font-bold uppercase">{{ $record->pendaftar->nama_pengirim ?? '-' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="uppercase">{{ $record->pendaftar->alamat_pengirim ?? $record->pendaftar->alamat_sampling ?? '-' }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="total-row grand-total">
-                <span class="total-label" style="color: #0d9488;">{{ $record->status_bayar === 2 ? 'TOTAL LUNAS' : 'SISA TAGIHAN' }}</span>
-                <span class="total-value">IDR {{ number_format($record->total_harga - $record->total_bayar, 0, ',', '.') }}</span>
+
+            <!-- Right Column: Transaksi Info -->
+            <div class="w-5/12 px-2 space-y-1">
+                <div class="flex text-xs">
+                    <div class="w-5/12">Nomor</div>
+                    <div class="w-1/12 text-center">:</div>
+                    <div class="w-6/12 ">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/K/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
+                </div>
+                <div class="flex text-xs">
+                    <div class="w-5/12">Jenis Sampel</div>
+                    <div class="w-1/12 text-center">:</div>
+                    <div class="w-6/12">{{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}</div>
+                </div>
+                <div class="flex text-xs">
+                    <div class="w-5/12">Titik Sampling</div>
+                    <div class="w-1/12 text-center">:</div>
+                    <div class="w-6/12">{{ $record->pendaftar->titik_sampling ?? '-' }}</div>
+                </div>
+                <div class="flex text-xs">
+                    <div class="w-5/12">Tgl Pendaftaran</div>
+                    <div class="w-1/12 text-center">:</div>
+                    <div class="w-6/12">{{ $record->pendaftar->tanggal_pendaftar ? \Carbon\Carbon::parse($record->pendaftar->tanggal_pendaftar)->format('d-m-Y') : '-' }}</div>
+                </div>
             </div>
         </div>
 
-        <div class="footer">
-            <div>
-                <p>Customer,</p>
-                <div class="signature"></div>
-                <p>( ____________________ )</p>
+        <!-- TABLE SECTION -->
+        <div class="w-full mb-6">
+            <table class="w-full text-xs border-collapse">
+                <thead>
+                    <tr class="border-t border-b-[2px] border-black">
+                        <th class="py-2 text-center w-[5%] uppercase font-bold">No</th>
+                        <th class="py-2 text-center uppercase font-bold">Parameter</th>
+                        <th class="py-2 text-center w-[10%] uppercase font-bold">QTY</th>
+                        <th class="py-2 text-center w-[20%] uppercase font-bold">Harga</th>
+                        <th class="py-2 text-center w-[20%] uppercase font-bold">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($parameters as $index => $param)
+                    <tr class="border-b border-b-[1px] border-black">
+                        <td class="py-1 text-center">{{ $index + 1 }}</td>
+                        <td class="py-1 ">{{ $param->nama_parameter }}</td>
+                        <td class="py-1 text-center">1</td>
+                        <td class="py-1 text-right">{{ number_format($param->harga_parameter, 0, ',', '.') }}</td>
+                        <td class="py-1 text-right">{{ number_format($param->harga_parameter, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                    
+                    <!-- TOTAL ROW -->
+                    <tr class="border-t-[2px] border-black">
+                        <td colspan="3"></td>
+                        <td class="py-2 text-right uppercase font-bold">Total</td>
+                        <td class="py-2 text-right font-bold text-black border-l-0">
+                            Rp {{ number_format($record->total_harga, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER SECTION -->
+        <div class="flex flex-wrap mt-8">
+            <!-- Payment Info -->
+            <div class="w-7/12 pr-4">
+                <strong class="block text-xs mb-1">Informasi Pembayaran</strong>
+                <p class="text-[11px] leading-snug mb-2">
+                    BPD Bank Jateng No. Rek. <b>1-010-011660</b><br>
+                    a.n. UPTD Labkesda Sragen<br><br>
+                    Format Transfer ditulis pada kolom <b>berita/keterangan</b>:
+                </p>
+                <div class="inline-block p-2 border-2 border-dashed border-black bg-white rounded text-xs font-bold">
+                    {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('ymd') : now()->format('ymd') }}{{ $record->pendaftar->no_pendaftar }}
+                </div>
+                <p class="italic text-[10px] mt-3 leading-tight">
+                    * Pembayaran harap dilakukan paling lambat 14 hari setelah dokumen ini terbit.<br>
+                    * Konfirmasi pembayaran melalui Whatsapp: <b>0851-4374-5050</b>
+                </p>
             </div>
-            <div>
-                <p>Petugas Administrasi,</p>
-                <div class="signature"></div>
-                <p>( {{ auth()->user()->name ?? 'Petugas Lab' }} )</p>
+
+            <!-- Signature -->
+            <div class="w-5/12 flex flex-col justify-end items-center text-center">
+                <div class="mb-12 text-xs">
+                    <span>Sragen, {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->locale('id')->translatedFormat('d F Y') : now()->locale('id')->translatedFormat('d F Y') }}</span><br>
+                    <span>Penerima</span>
+                </div>
+                <div class="w-40 border-b border-black pb-1 text-xs">
+                    <!-- {{ auth()->user()->name ?? 'Petugas' }} -->
+                </div>
             </div>
         </div>
+        @endif
     </div>
-    @else
-    <div class="container" style="text-align: center; color: #dc2626; padding: 100px;">
-        <h3>Error: Data Pendaftar Tidak Ditemukan</h3>
-        <p>Silakan periksa kembali kuitansi ini atau hubungi administrator.</p>
-    </div>
-    @endif
 </body>
 </html>

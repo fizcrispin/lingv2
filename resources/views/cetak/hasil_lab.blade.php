@@ -3,148 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Hasil Uji - {{ $record->no_pendaftar }}</title>
+    <title>Hasil Pengujian - {{ $record->no_pendaftar }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.4; color: #000; }
-        .container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 20px; }
-        
-        /* Header */
-        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; font-weight: bold; }
-        .header h2 { margin: 5px 0 0; font-size: 14px; font-weight: normal; }
-        .header p { margin: 2px 0; font-size: 11px; }
-
-        /* Title */
-        .doc-title { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 20px; text-decoration: underline; text-transform: uppercase; }
-
-        /* Info Grid */
-        .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
-        .info-table td { padding: 4px; vertical-align: top; }
-        .info-label { width: 140px; font-weight: bold; }
-        .info-colon { width: 10px; }
-
-        /* Results Table */
-        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .results-table th, .results-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
-        .results-table th { background-color: #f3f3f3; font-weight: bold; text-align: center; font-size: 11px; text-transform: uppercase; }
-        .results-table td.center { text-align: center; }
-        
-        .category-row td { background-color: #e5e7eb; font-weight: bold; text-align: left; text-transform: uppercase; padding: 8px; }
-
-        /* Footer / Signature */
-        .footer-section { display: flex; justify-content: space-between; margin-top: 50px; page-break-inside: avoid; }
-        .signature-box { width: 200px; text-align: center; }
-        .signature-box p { margin: 0; }
-        .signature-space { height: 80px; }
-        
-        @media print {
-            body { margin: 0; -webkit-print-color-adjust: exact; }
-            .container { padding: 0; max-width: none; }
-            .no-print { display: none; }
-            @page { margin: 1.5cm; size: A4 portrait; }
+        body { 
+            font-family: Arial, sans-serif; 
+            color: black; 
+            background: white; 
+            -webkit-print-color-adjust: exact; 
+            font-size: 11pt;
+            line-height: 1.3;
         }
+
+        .no-print-wrapper { 
+            text-align: center; 
+            margin-bottom: 20px; 
+        }
+
+        @media print {
+            .no-print-wrapper { 
+                display: none; 
+            }
+            body { 
+                padding: 0; 
+                margin: 0; 
+            }
+            @page { 
+                margin: 1cm; 
+                size: auto; 
+            }
+        }
+        
+        /* Custom Table Styles */
+        table { border-collapse: collapse; width: 100%; }
+        /* th, td border handled by Tailwind utility classes */
+        th, td { padding: 4px 6px; }
+        th { text-align: center; background-color: white; }
     </style>
 </head>
-<body onload="window.print()">
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Laboratorium Lingkungan</h1>
-            <h2>PT. Lingkungan Sehat Sejahtera</h2>
-            <p>Jl. Contoh No. 123, Kota Besar, Indonesia | Telp: (021) 12345678</p>
-            <p>Email: lab@lingkungansehat.com | Website: www.lingkungansehat.com</p>
-        </div>
+<body class="p-8 bg-gray-100">
+    <!-- Buttons -->
+    <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Hasil</button>
+        <button class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 font-sans" onclick="window.close()">Tutup</button>
+    </div>
 
-        <!-- Document Title -->
-        <h3 class="doc-title">Laporan Hasil Uji</h3>
-
-        <!-- Information -->
-        <table class="info-table">
-            <tr>
-                <td class="info-label">No. Pendaftaran</td>
-                <td class="info-colon">:</td>
-                <td>{{ $record->no_pendaftar }}</td>
-                
-                <td class="info-label">Tgl. Terima</td>
-                <td class="info-colon">:</td>
-                <td>{{ $record->created_at->format('d/m/Y') }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Nama Pengirim</td>
-                <td class="info-colon">:</td>
-                <td>{{ $record->nama_pengirim }}</td>
-
-                <td class="info-label">Tgl. Analisa</td>
-                <td class="info-colon">:</td>
-                <td>{{ \Carbon\Carbon::parse($tglUji)->format('d/m/Y') }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Jenis Sampel</td>
-                <td class="info-colon">:</td>
-                <td>{{ $record->jenisSampel->nama_sampel ?? '-' }}</td>
-
-                <td class="info-label">Alamat Sampling</td>
-                <td class="info-colon">:</td>
-                <td>{{ $record->alamat_sampling ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="info-label">Keterangan</td>
-                <td class="info-colon">:</td>
-                <td colspan="4">{{ $record->keterangan ?? '-' }}</td>
-            </tr>
-        </table>
-
-        <!-- Results -->
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th width="5%">No</th>
-                    <th width="30%">Parameter</th>
-                    <th width="15%">Satuan</th>
-                    <th width="10%">Batas Max</th>
-                    <th width="15%">Hasil Uji</th>
-                    <th width="25%">Metode</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $no = 1; @endphp
-                @foreach($groupedResults as $kategori => $items)
-                    <tr class="category-row">
-                        <td colspan="6">{{ $kategori }}</td>
-                    </tr>
-                    @foreach($items as $item)
-                        <tr>
-                            <td class="center">{{ $no++ }}</td>
-                            <td>{{ $item->nama_parameter }}</td>
-                            <td class="center">{{ $item->parameter->satuan ?? '-' }}</td>
-                            <td class="center">{{ $item->parameter->batas_max ?? '-' }}</td>
-                            <td class="center" style="font-weight: bold;">{{ $item->hasil_parameter ?? '-' }}</td>
-                            <td>{{ $item->parameter->metode_pemeriksaan ?? '-' }}</td>
-                        </tr>
-                    @endforeach
-                @endforeach
-            </tbody>
-        </table>
-
-        <!-- Signature -->
-        <div class="footer-section">
-            <div class="signature-box"></div> <!-- Spacer for left side if needed -->
+    <!-- Main Paper Content -->
+    <div id="laporan" class="max-w-[210mm] mx-auto bg-white p-0">
+        <!-- HEADER -->
+        <div class="relative border-b-[3px] border-black pb-4 mb-2">
+            <!-- Left Logo -->
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Seal_of_Sragen_Regency.svg/250px-Seal_of_Sragen_Regency.svg.png" alt="Logo" class="absolute left-0 top-0 h-[80px] object-contain">
             
-            <div class="signature-box">
-                <p>Kota Besar, {{ now()->translatedFormat('d F Y') }}</p>
-                <p>Manajer Teknis</p>
-                <div class="signature-space"></div>
-                <p style="text-decoration: underline; font-weight: bold;">( Nama Manajer )</p>
+            <!-- Right Logo -->
+            <img src="{{ asset('resources/logo/logo-KALK.png') }}" alt="Logo" class="absolute right-0 top-0 h-[80px] object-contain">
+
+            <div class="w-full text-center px-24">
+                <h5 class="uppercase font-bold text-[14px] mb-[2px] leading-tight">Pemerintah Kabupaten Sragen</h5>
+                <h5 class="uppercase font-bold text-[14px] mb-[2px] leading-tight">Dinas Kesehatan</h5>
+                <h4 class="font-bold text-[16px] mb-[2px] leading-tight">UPTD LABORATORIUM KESEHATAN</h4>
+                <small class="block text-[11px] leading-tight">Jalan Jend. Ahmad Yani, Sragen, Jawa Tengah 57216</small>
+                <small class="block text-[11px] leading-tight">Telepon (0271) 891078, Laman labkesda.sragenkab.go.id, Pos-el labkesda.sragen@gmail.com</small>
             </div>
         </div>
 
-        <div style="margin-top: 20px; font-size: 10px; font-style: italic;">
-            <p>Catatan:</p>
-            <ol>
-                <li>Hasil uji ini hanya berlaku untuk sampel yang diuji.</li>
-                <li>Laporan ini tidak boleh digandakan kecuali secara lengkap dan dengan persetujuan tertulis dari laboratorium.</li>
+        <!-- TITLE -->
+        <div class="text-center py-2 mb-4">
+            <h4 class="uppercase font-bold text-[15px]">Hasil Pemeriksaan Laboratorium</h4>
+        </div>
+
+        <!-- INFO SECTION -->
+        <div class="px-2 mb-4 text-[13px]">
+            <!-- Row 1: Nomor -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Nomor</span><span>:</span></div>
+                <div class="w-9/12 pl-2">400.7.5./{{ $record->no_pendaftar ?? '-' }}/H/LL/05.3.1/{{ $record->tanggal_pendaftar ? $record->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
+            </div>
+            
+            <!-- Row 2: Nama Register (Nama Pengirim) -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Nama Register</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->nama_pengirim }}</div>
+            </div>
+
+             <!-- Row 3: Alamat -->
+             <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Alamat</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->alamat_pengirim }}</div>
+            </div>
+
+            <!-- Row 4: Jenis Sampel -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Jenis Sampel</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->jenisSampel->nama_sampel ?? '-' }}</div>
+            </div>
+
+            <!-- Row 5: Petugas Sampling -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Petugas Sampling</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->petugas_sampling ?? '-' }}</div>
+            </div>
+
+             <!-- Row 6: Titik Sampling -->
+             <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Titik Sampling</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->titik_sampling ?? '-' }}</div>
+            </div>
+
+             <!-- Row 7: Alamat Sampling -->
+             <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Alamat Sampling</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->alamat_sampling ?? '-' }}</div>
+            </div>
+
+            <!-- Row 8: Waktu Sampling -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Waktu Sampling</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->tanggal_sampling ? \Carbon\Carbon::parse($record->tanggal_sampling)->locale('id')->translatedFormat('d F Y') : '-' }}</div>
+            </div>
+
+            <!-- Row 9: Baku Mutu -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Baku Mutu</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->regulasi->nama_regulasi ?? '-' }}</div>
+            </div>
+
+            <!-- Row 10: Keterangan -->
+            <div class="flex mb-1">
+                <div class="w-3/12 flex justify-between pr-2"><span>Keterangan</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->keterangan ?? '-' }}</div>
+            </div>
+        </div>
+
+        <!-- TABLE SECTION -->
+        <div class="py-2 mb-4" style="padding-top: 0.5rem !important; padding-bottom: 1rem !important;">
+            <table class="w-full text-[12px] border-collapse" style="border: 1px solid black;">
+                <thead class="bg-gray-300 print:bg-gray-300">
+                    <tr style="color: black !important;">
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[5%] text-center align-middle font-bold text-[12px]">No</th>
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[28%] text-center align-middle font-bold text-[12px]">Parameter</th>
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[17%] text-center align-middle font-bold text-[12px]">Hasil</th>
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[15%] text-center align-middle font-bold text-[12px]" style="text-wrap: balance;">Baku Mutu</th>
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[14%] text-center align-middle font-bold text-[12px]">Satuan</th>
+                        <th class="py-1 px-1 border-b-[1px] border-black w-[21%] text-center align-middle font-bold text-[12px]">Metode</th>
+                    </tr>
+                </thead>
+                <tbody style="color: black !important;">
+                    @forelse($groupedResults as $kategori => $items)
+                        <!-- Category Header -->
+                        <tr class="border-b border-gray-400">
+                            <td colspan="6" class="py-1 px-2 font-bold uppercase text-left align-middle border-b border-gray-400 text-black">
+                                {{ $kategori }}
+                            </td>
+                        </tr>
+                        
+                        @php $idx = 1; @endphp
+                        @foreach($items as $hasil)
+                        <tr class="border-b border-gray-300">
+                            <td class="py-1 px-1 text-center align-middle text-[12px]">{{ $idx++ }}</td>
+                            <td class="py-1 px-1 align-middle text-[12px] pl-4">{{ $hasil->nama_parameter }}</td>
+                            <td class="py-1 px-1 text-center align-middle font-bold text-[12px]">{{ $hasil->hasil_parameter ?? '' }}</td>
+                            <td class="py-1 px-1 text-center align-middle text-[12px]">{{ $hasil->parameter->batas_max ?? '' }}</td>
+                            <td class="py-1 px-1 text-center align-middle text-[12px]">{{ $hasil->parameter->satuan ?? '' }}</td>
+                            <td class="py-1 px-1 text-center align-middle text-[12px]">{{ $hasil->parameter->metode_pemeriksaan ?? '' }}</td>
+                        </tr>
+                        @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-4 italic text-gray-500">Belum ada hasil pengujian yang diinput.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- NOTES SECTION -->
+        <div class="text-[12px] mb-8">
+            <span class="font-bold mb-1 block">CATATAN :</span>
+            <ol class="list-decimal pl-5 space-y-1">
+                <li>Hasil Pemeriksaan hanya berlaku untuk parameter yang dilaksanakan pengujian laboratorium.</li>
+                <li>Dilarang menggandakan dokumen ini sebagai laporan hasil pengujian tanpa persetujuan dari UPTD Laboratorium Kesehatan Kabupaten Sragen.</li>
             </ol>
         </div>
+
+        <!-- FOOTER SIGNATURES -->
+        <div class="pt-4 text-[13px]">
+            <!-- Date Row -->
+            <div class="grid grid-cols-2 mb-4">
+                <div></div> <!-- Spacer -->
+                <div class="text-center">
+                    <span>
+                        @if($record->hasilLingkungans->max('created_at'))
+                            Sragen, {{ \Carbon\Carbon::parse($record->hasilLingkungans->max('created_at'))->locale('id')->translatedFormat('d F Y') }}
+                        @else
+                            Tanggal Input Hasil Belum dimasukan
+                        @endif
+                    </span>
+                </div>
+            </div>
+
+            <!-- Titles -->
+             <div class="grid grid-cols-2 text-center mb-16">
+                <div>
+                    <p class="font-bold">Kepala UPTD Laboratorium Kesehatan</p>
+                    <p>Kabupaten Sragen</p>
+                </div>
+                <div>
+                    <p class="font-bold">Penanggung Jawab</p>
+                    <p>Laboratorium Lingkungan</p>
+                </div>
+            </div>
+
+            <!-- Names & NIPs -->
+            <div class="grid grid-cols-2 text-center">
+                <!-- Kepala UPTD -->
+                <div>
+                     <p class="font-bold underline mb-1">SISWIYARDI, S.K.M., M.M.</p>
+                     <p>NIP. 19721023 199503 1 002</p>
+                </div>
+                <!-- PJ Lab -->
+                <div>
+                    <p class="font-bold underline mb-1">HAFIZ FAUZI, A.Md.Kes.</p>
+                    <p>NIP. 19980524 202321 1 002</p>
+               </div>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>

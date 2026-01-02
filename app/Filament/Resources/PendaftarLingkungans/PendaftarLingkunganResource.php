@@ -62,7 +62,7 @@ class PendaftarLingkunganResource extends Resource
 
     protected static ?string $navigationLabel = 'Pendaftaran';
 
-    protected static ?string $recordTitleAttribute = 'PendaftarLingkungan';
+    protected static ?string $recordTitleAttribute = 'no_pendaftar';
 
     public static function form(Schema $schema): Schema
     {

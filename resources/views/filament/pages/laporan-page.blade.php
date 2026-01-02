@@ -8,67 +8,70 @@
 
     <div class="space-y-6">
 
-        <x-filament::section>
-            <x-slot name="heading">
-                <div class="flex items-center gap-2">
-                    <x-filament::icon icon="heroicon-o-presentation-chart-line" class="w-5 h-5 text-gray-500" />
-                    <span>Ringkasan Eksekutif</span>
+        <!-- Stat Widgets -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Pendaftar -->
+            <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                <div class="flex items-center gap-4">
+                    <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-primary-50 dark:bg-primary-900/20">
+                        <x-filament::icon icon="heroicon-o-users" class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pendaftar</p>
+                        <p class="text-3xl font-bold text-gray-950 dark:text-white mt-1">
+                            {{ number_format($pendaftaran_count, 0, ',', '.') }}
+                        </p>
+                    </div>
                 </div>
-            </x-slot>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-white/5">
-                    <thead>
-                        <tr class="bg-gray-50/50 dark:bg-white/5">
-                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Kategori</th>
-                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Indikator</th>
-                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase dark:text-gray-400">Nilai</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-white/5">
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-75">
-                            <td class="px-6 py-4 font-medium text-gray-950 dark:text-white">Pendaftaran</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">Total Pendaftar</td>
-                            <td class="px-6 py-4 font-bold text-right text-gray-950 dark:text-white font-mono tabular-nums text-lg">
-                                {{ number_format($pendaftaran_count, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-75">
-                            <td class="px-6 py-4 font-medium text-gray-950 dark:text-white">Ekspedisi</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">Rata-rata Waktu Tunggu</td>
-                            <td class="px-6 py-4 font-bold text-right text-warning-600 font-mono tabular-nums text-lg">
-                                {{ $avg_verifikasi_time }}
-                            </td>
-                        </tr>
-
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-75">
-                            <td class="px-6 py-4 font-medium text-gray-950 dark:text-white">Keuangan</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">Total Pendapatan (Lunas)</td>
-                            <td class="px-6 py-4 font-bold text-right text-success-600 font-mono tabular-nums text-lg">
-                                <span class="text-xs text-gray-400 font-sans mr-1">Rp</span>{{ number_format($total_revenue, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-75">
-                            <td class="px-6 py-4 font-medium text-gray-950 dark:text-white">Keuangan</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">Invoice Belum Lunas</td>
-                            <td class="px-6 py-4 font-bold text-right text-danger-600 font-mono tabular-nums text-lg">
-                                {{ number_format($total_unpaid, 0, ',', '.') }}
-                            </td>
-                        </tr>
-
-                        <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition duration-75">
-                            <td class="px-6 py-4 font-medium text-gray-950 dark:text-white">Keuangan</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">Invoice Lunas (Jumlah)</td>
-                            <td class="px-6 py-4 font-bold text-right text-primary-600 font-mono tabular-nums text-lg">
-                                {{ number_format($total_paid, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
-        </x-filament::section>
+
+            <!-- Total Revenue -->
+            <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                <div class="flex items-center gap-4">
+                    <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-success-50 dark:bg-success-900/20">
+                        <x-filament::icon icon="heroicon-o-currency-dollar" class="w-6 h-6 text-success-600 dark:text-success-400" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estimasi Pendapatan</p>
+                        <p class="text-3xl font-bold text-gray-950 dark:text-white mt-1">
+                            <span class="text-sm font-normal text-gray-400">Rp</span>{{ number_format($total_revenue, 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Status Grid (Combined for compactness) -->
+            <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                 <div class="flex items-center gap-4">
+                    <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                        <x-filament::icon icon="heroicon-o-document-check" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Inv. Lunas / Pending</p>
+                         <div class="flex items-baseline gap-2 mt-1">
+                            <p class="text-3xl font-bold text-gray-950 dark:text-white">{{ $total_paid }}</p>
+                            <span class="text-sm text-gray-400">/</span>
+                            <p class="text-xl font-semibold text-danger-500">{{ $total_unpaid }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational Metric -->
+            <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                <div class="flex items-center gap-4">
+                    <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                        <x-filament::icon icon="heroicon-o-clock" class="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg. Waktu Tunggu</p>
+                        <p class="text-3xl font-bold text-gray-950 dark:text-white mt-1">
+                            {{ $avg_verifikasi_time }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
@@ -156,32 +159,33 @@
             </x-filament::section>
 
             <x-filament::section>
-                <x-slot name="heading">Top 10 Parameter</x-slot>
-                <x-slot name="headerEnd">
-                     <x-filament::badge color="info">Terbanyak</x-filament::badge>
-                </x-slot>
-
+                <x-slot name="heading">Statistik Parameter</x-slot>
+                
                 <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
-                    <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-white/5">
-                        <thead class="bg-gray-50 dark:bg-white/5">
-                            <tr>
-                                <th class="px-4 py-2.5 text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Parameter</th>
-                                <th class="px-4 py-2.5 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Frekuensi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-white/5 bg-white dark:bg-gray-900">
-                            @foreach($parameter_stats as $param => $count)
-                            <tr class="group hover:bg-gray-50 dark:hover:bg-white/5">
-                                <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-medium group-hover:text-primary-600 transition-colors">
-                                    {{ $param }}
-                                </td>
-                                <td class="px-4 py-3 font-bold text-right text-gray-950 dark:text-white font-mono tabular-nums">
-                                    {{ $count }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-white/5 relative">
+                            <thead class="bg-gray-50 dark:bg-white/5 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="px-4 py-2.5 text-xs font-medium text-gray-500 uppercase dark:text-gray-400 bg-gray-50 dark:bg-gray-900/90 backdrop-blur">Parameter</th>
+                                    <th class="px-4 py-2.5 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400 bg-gray-50 dark:bg-gray-900/90 backdrop-blur">Frekuensi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-white/5 bg-white dark:bg-gray-900">
+                                @forelse($parameter_stats as $param => $count)
+                                <tr class="group hover:bg-gray-50 dark:hover:bg-white/5">
+                                    <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-medium group-hover:text-primary-600 transition-colors">
+                                        {{ $param }}
+                                    </td>
+                                    <td class="px-4 py-3 font-bold text-right text-gray-950 dark:text-white font-mono tabular-nums">
+                                        {{ $count }}
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="2" class="px-4 py-8 text-center text-gray-500 italic">Tidak ada data parameter</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </x-filament::section>
         </div>

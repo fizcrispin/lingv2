@@ -91,6 +91,7 @@ class TransaksisTable
                     ->label('Metode')
                     ->placeholder('-'),
             ])
+
             ->filters([
                 Filter::make('tanggal_tagihan')
                     ->form([
@@ -170,7 +171,6 @@ class TransaksisTable
             ->actionsPosition(\Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
                     \Filament\Actions\BulkAction::make('bulk_edit')
                         ->label('Edit Masal')
                         ->icon('heroicon-o-pencil-square')

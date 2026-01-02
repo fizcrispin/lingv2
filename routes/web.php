@@ -36,11 +36,27 @@ Route::get('/print/{id}/{type}', function ($id, $type) {
         'bukti_bayar' => 'Bukti Pembayaran / Kuitansi',
     ];
     
+    $terbilang = function($x) use (&$terbilang) {
+        $angka = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+        if ($x < 12) return " " . $angka[$x];
+        elseif ($x < 20) return $terbilang($x - 10) . " belas";
+        elseif ($x < 100) return $terbilang($x / 10) . " puluh" . $terbilang($x % 10);
+        elseif ($x < 200) return " seratus" . $terbilang($x - 100);
+        elseif ($x < 1000) return $terbilang($x / 100) . " ratus" . $terbilang($x % 100);
+        elseif ($x < 2000) return " seribu" . $terbilang($x - 1000);
+        elseif ($x < 1000000) return $terbilang($x / 1000) . " ribu" . $terbilang($x % 1000);
+        elseif ($x < 1000000000) return $terbilang($x / 1000000) . " juta" . $terbilang($x % 1000000);
+    };
+
     return view('print.invoice', [
         'record' => $record,
         'title' => $titles[$type] ?? 'Dokumen Transaksi',
+        'type' => $type, // Pass strict type key
         'parameters' => $parameters,
+        'terbilang' => ucwords(trim($terbilang($record->total_harga ?? 0))) . " Rupiah",
     ]);
 })->name('print.transaksi');
 
 Route::get('/input-hasil/{record}/cetak', App\Http\Controllers\CetakHasilController::class)->name('cetak.hasil');
+
+Route::get('/cetak/hasil-bulk', App\Http\Controllers\BulkCetakHasilController::class)->name('cetak.hasil.bulk');

@@ -1,9 +1,61 @@
 @import 'tailwindcss';
 
+@config "../../tailwind.config.js";
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+
+/* Enterprise Clean Background */
+body {
+    background-color: #f8fafc;
+    /* Slate-50 */
+}
+
+.dark body {
+    background-color: #0f172a;
+    /* Slate-900 */
+}
+
+/* Professional Table Header styling */
+.fi-ta-header-cell {
+    background-color: #f1f5f9 !important;
+    /* Slate-100 */
+    color: #334155 !important;
+    /* Slate-700 */
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .fi-ta-header-cell {
+    background-color: #1e293b !important;
+    /* Slate-800 */
+    color: #cbd5e1 !important;
+    /* Slate-300 */
+    border-bottom: 1px solid #334155;
+}
+
+.fi-ta-header-cell button span {
+    color: inherit !important;
+}
+
+.fi-ta-header-cell .fi-ta-header-cell-label {
+    color: inherit !important;
+}
+
+/* Subtle Mobile Card Shadow */
+@media (max-width: 768px) {
+    .fi-ta-content {
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+    }
+
+    .dark .fi-ta-content {
+        border-color: #334155;
+    }
+}
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',

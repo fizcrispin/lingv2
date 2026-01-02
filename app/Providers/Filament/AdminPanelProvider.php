@@ -42,9 +42,17 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->maxContentWidth('85%')
             ->colors([
-                'primary' => Color::Teal,
-                'gray' => Color::Zinc,
+                'primary' => Color::Blue,
+                'gray' => Color::Slate, // Slate is more "Enterprise" than Zinc
+                'info' => Color::Blue,
+                'success' => Color::Emerald, // Soft green
+                'warning' => Color::Orange, // Soft orange
+                'danger' => Color::Rose, // Soft red
             ])
+            ->renderHook(
+                'panels::head.end',
+                fn () => \Illuminate\Support\Facades\Blade::render('@vite("resources/css/app.css")')
+            )
             ->font('Inter')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

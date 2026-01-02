@@ -24,8 +24,8 @@ class InputHasilResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationLabel = 'Input Hasil';
-    protected static ?string $slug = 'input-hasil-lab';
+    protected static ?string $navigationLabel = 'Hasil Laboratorium';
+    protected static ?string $slug = 'hasil-lab';
 
     public static function form(Schema $schema): Schema
     {
@@ -77,19 +77,8 @@ class InputHasilResource extends Resource
                     ->icon('heroicon-o-pencil-square')
                     ->modalWidth('7xl')
                     ->mutateRecordDataUsing(function (PendaftarLingkungan $record, array $data): array {
-                        // 1. Sync Logic (Create Hasil records if missing)
-                        $params = $record->all_parameters;
-                        foreach ($params as $param) {
-                            \App\Models\HasilLingkungan::firstOrCreate([
-                                'id_pendaftar' => $record->id,
-                                'id_parameter' => $param->id,
-                            ], [
-                                'nama_parameter' => $param->nama_parameter,
-                                'tanggal_input' => now(), 
-                            ]);
-                        }
-                        
-                        // 2. Load latest data for form population
+                        // Load latest data for form population
+                        // Note: Sync logic moved to form() to ensure schema availability
                         $record->load(['hasilLingkungans.parameter.kategoriData', 'jenisSampel']);
                         
                         $hasilData = [];
@@ -106,6 +95,24 @@ class InputHasilResource extends Resource
                     })
                     ->form(function (?PendaftarLingkungan $record) {
                         if (!$record) return [];
+                        
+                        // --- SYNC LOGIC (Moved here to ensure Schema exists) ---
+                        if ($record->hasilLingkungans->isEmpty()) {
+                            $params = $record->all_parameters;
+                            foreach ($params as $param) {
+                                \App\Models\HasilLingkungan::firstOrCreate([
+                                    'id_pendaftar' => $record->id,
+                                    'id_parameter' => $param->id,
+                                ], [
+                                    'nama_parameter' => $param->nama_parameter,
+                                    'tanggal_input' => now(), 
+                                ]);
+                            }
+                            // Refresh Relationship
+                            $record->load(['hasilLingkungans.parameter.kategoriData']);
+                        }
+                        // -------------------------------------------------------
+
                         $schema = [];
 
                         // SECTION 1: Informasi Pendaftaran - Stylist & Compact
@@ -288,7 +295,15 @@ class InputHasilResource extends Resource
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([
-                //
+                \Filament\Actions\BulkAction::make('cetak_masal')
+                    ->label('Cetak Masal')
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire) {
+                        $url = route('cetak.hasil.bulk', ['ids' => implode(',', $records->pluck('id')->toArray())]);
+                        $livewire->js("window.open('$url', '_blank')");
+                    })
+                    ->deselectRecordsAfterCompletion(),
             ]);
     }
 

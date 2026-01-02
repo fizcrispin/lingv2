@@ -163,14 +163,15 @@ class LaporanPage extends Page implements HasForms
         });
         // Sort and get names
         arsort($allParams);
-        $topParams = array_slice($allParams, 0, 10, true);
-        $paramNames = \App\Models\ParameterLingkungan::whereIn('id', array_keys($topParams))->pluck('nama_parameter', 'id');
+        // $topParams = array_slice($allParams, 0, 10, true); // Removed limit
+        
+        $paramNames = \App\Models\ParameterLingkungan::whereIn('id', array_keys($allParams))->pluck('nama_parameter', 'id');
         
         $this->parameter_stats = [];
-        foreach($topParams as $pid => $count) {
-            if(isset($paramNames[$pid])) {
-                $this->parameter_stats[$paramNames[$pid]] = $count;
-            }
+        foreach($allParams as $pid => $count) {
+             if(isset($paramNames[$pid])) {
+                 $this->parameter_stats[$paramNames[$pid]] = $count;
+             }
         }
 
 

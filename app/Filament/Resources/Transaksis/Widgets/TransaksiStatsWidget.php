@@ -11,18 +11,18 @@ class TransaksiStatsWidget extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Tagihan', InvoiceLingkungan::count())
-                ->description('Total seluruh data tagihan')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('primary'),
-            Stat::make('Sudah Lunas', InvoiceLingkungan::where('status_bayar', 2)->count())
-                ->description('Transaksi yang sudah dibayar')
-                ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
-            Stat::make('Belum Lunas', InvoiceLingkungan::where('status_bayar', '<', 2)->count())
-                ->description('Transaksi menunggu pembayaran')
+            Stat::make('Belum Bayar', InvoiceLingkungan::whereIn('status_bayar', [0, 1])->count())
+                ->description('Menunggu Pembayaran (0 & 1)')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('danger'),
+            Stat::make('Sudah Bayar', InvoiceLingkungan::where('status_bayar', 2)->count())
+                ->description('Lunas (2)')
+                ->descriptionIcon('heroicon-m-check-circle')
+                ->color('success'),
+            Stat::make('Semua Data', InvoiceLingkungan::count())
+                ->description('Total Seluruh Transaksi')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('primary'),
         ];
     }
 }
