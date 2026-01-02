@@ -65,10 +65,12 @@ class PendaftarLingkungansTable
 
             TextColumn::make('nama_pengirim')
                 ->label('Nama Pengirim')
+                ->limit(20)
+                ->tooltip(fn (\App\Models\PendaftarLingkungan $record) => $record->nama_pengirim)
                 ->width('120px')
                 ->searchable(),
 
-            TextColumn::make('jenisSampel.kode_sampel')
+            TextColumn::make('jenisSampel.nama_sampel')
                 ->label('Jenis Sampel')
                 ->searchable(),
 
@@ -78,43 +80,42 @@ class PendaftarLingkungansTable
                 ->tooltip(fn ($record) => "⚠️ {$record->titik_sampling}"),
 
             TextColumn::make('parameter_list')
-                ->label('Parameter Reguler')
-                ->wrapHeader()
-                ->wrap()
-                ->width('350px')
-                ->html()
-                ->formatStateUsing(function (\App\Models\PendaftarLingkungan $record) {
+                ->label('Parameter')
+                ->limit(20)
+                ->tooltip(function (\App\Models\PendaftarLingkungan $record) {
                     $allIds = [];
-
                     // 1. Ambil dari kolom parameter (manual)
                     $manualIds = $record->parameter; 
-                    if (is_array($manualIds)) {
-                        $allIds = array_merge($allIds, $manualIds);
-                    }
+                    if (is_array($manualIds)) $allIds = array_merge($allIds, $manualIds);
 
                     // 2. Ambil dari paket_id
-                    if (!empty($record->paket_id)) {
-                        $paket = $record->paket; 
-                        if ($paket && is_array($paket->parameter)) {
-                            $allIds = array_merge($allIds, $paket->parameter);
-                        }
+                    if (!empty($record->paket_id) && $record->paket && is_array($record->paket->parameter)) {
+                        $allIds = array_merge($allIds, $record->paket->parameter);
+                    }
+                    
+                    if (empty($allIds)) return '-';
+                    $names = \App\Models\ParameterLingkungan::whereIn('id', array_unique($allIds))->pluck('nama_parameter')->toArray();
+                    return implode(', ', $names);
+                })
+                ->formatStateUsing(function (\App\Models\PendaftarLingkungan $record) {
+                    $allIds = [];
+                    // 1. Ambil dari kolom parameter (manual)
+                    $manualIds = $record->parameter; 
+                    if (is_array($manualIds)) $allIds = array_merge($allIds, $manualIds);
+
+                    // 2. Ambil dari paket_id
+                    if (!empty($record->paket_id) && $record->paket && is_array($record->paket->parameter)) {
+                        $allIds = array_merge($allIds, $record->paket->parameter);
                     }
 
                     $allIds = array_unique(array_filter(array_map('intval', $allIds)));
-
-                    if (empty($allIds)) {
-                        return '-';
-                    }
+                    if (empty($allIds)) return '-';
 
                     $names = \App\Models\ParameterLingkungan::whereIn('id', $allIds)
                         ->pluck('nama_parameter')
                         ->toArray();
-
-                    if (empty($names)) {
-                        return '-';
-                    }
-
-                    return new \Illuminate\Support\HtmlString('<div class="text-xs leading-relaxed">' . e(implode(', ', $names)) . '</div>');
+                    
+                    return empty($names) ? '-' : implode(', ', $names);
                 }),
                         TextColumn::make('total_harga')
                             ->label('Total Biaya')
