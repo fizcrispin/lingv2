@@ -40,6 +40,7 @@ use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Radio;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
+use Filament\Forms\Components\TimePicker;
 
 
 
@@ -112,8 +113,9 @@ class PendaftarLingkunganForm
                         ]),
 
                     TextInput::make('no_hp')
-                        ->label('No. Handphone')
+                        ->label('Nomor Ponsel')
                         ->placeholder('628xxxxxxxx')
+                        ->required()
                         ->maxLength(128)
                         ->tel()
                         ->prefixIcon('heroicon-o-phone')
@@ -128,18 +130,20 @@ class PendaftarLingkunganForm
 
                     TextInput::make('nama_pengirim')
                         ->label('Nama Pendaftar')
+                        ->required()
                         ->maxLength(128)
-                        ->placeholder('Masukkan nama lengkap')
+                        ->placeholder('Personal atau perusahaan.')
                         ->prefixIcon('heroicon-o-user')
                         ->extraAttributes(fn (Get $get) => [
                             'title' => 'Nama: ' . ($get('nama_pengirim') ?: '-'),
                         ]),                        
 
                     TextInput::make('alamat_pengirim')
-                        ->label('Alamat Lengkap')
+                        ->label('Alamat Pendaftar')
+                        ->required()
                         ->columnSpan(2)
                         ->maxLength(256)
-                        ->placeholder('Jl. ...')
+                        ->placeholder('Alamat lengkap personal maupun perusahaan.')
                         ->prefixIcon('heroicon-o-map-pin')
                         ->extraAttributes(fn (Get $get) => [
                             'title' => 'Alamat: ' . ($get('alamat_pengirim') ?: '-'),
@@ -147,8 +151,18 @@ class PendaftarLingkunganForm
                 ]),
 
             // Data Sampling
-            Grid::make(['default' => 1, 'sm' => 2, 'lg' => 3])
+            Grid::make(['default' => 1, 'sm' => 3, 'lg' => 4])
                 ->schema([
+                    TextInput::make('petugas_sampling')
+                        ->label('Petugas Sampling')
+                        ->required()
+                        ->maxLength(128)
+                        ->placeholder('Nama petugas')
+                        ->prefixIcon('heroicon-o-identification')
+                        ->extraAttributes(fn (Get $get) => [
+                            'title' => 'Petugas: ' . ($get('petugas_sampling') ?: '-'),
+                        ]),
+
                     Select::make('jenis_sampling')
                         ->label('Jenis Sampel')
                         ->relationship('jenisSampel', 'nama_sampel')
@@ -161,19 +175,20 @@ class PendaftarLingkunganForm
                         ]),
 
                     DatePicker::make('tanggal_sampling')
+                        ->required()
                         ->label('Tanggal Sampling')
                         ->default(now())
                         ->extraAttributes(fn (Get $get) => [
                             'title' => 'Tanggal: ' . ($get('tanggal_sampling') ? date('d/m/Y', strtotime($get('tanggal_sampling'))) : date('d/m/Y')),
                         ]),
 
-                    TextInput::make('petugas_sampling')
-                        ->label('Petugas Sampling')
-                        ->maxLength(128)
-                        ->placeholder('Nama petugas')
-                        ->prefixIcon('heroicon-o-identification')
+                    TimePicker::make('waktu_sampling')
+                        ->label('Waktu Sampling')
+                        ->default('00:00')          // 👈 default jam 00:00
+                        ->seconds(false)            // 👈 hanya jam & menit
+                        ->format('H:i')             // 👈 24 jam (16:40)
                         ->extraAttributes(fn (Get $get) => [
-                            'title' => 'Petugas: ' . ($get('petugas_sampling') ?: '-'),
+                            'title' => 'Waktu: ' . ($get('waktu_sampling') ?? '00:00'),
                         ]),
 
                 ]),
@@ -192,6 +207,7 @@ class PendaftarLingkunganForm
 
                     TextInput::make('alamat_sampling')
                         ->label('Alamat Sampling')
+                        ->required()
                         ->columnspan(2)
                         ->maxLength(128)
                         ->placeholder('Alamat lengkap lokasi sampling')
