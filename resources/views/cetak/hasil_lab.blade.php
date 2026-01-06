@@ -17,7 +17,13 @@
 
         .no-print-wrapper { 
             text-align: center; 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
+        }
+
+        /* Signature Block Protection */
+        .signature-block {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         @media print {
@@ -29,19 +35,39 @@
                 margin: 0; 
             }
             @page { 
-                margin: 1cm; 
-                size: auto; 
+                /* F4 Size (215mm x 330mm) */
+                size: 215mm 330mm; 
+                margin: 1.5cm; 
+            }
+
+            @page {
+                @bottom-right {
+                    content: "Halaman " counter(page) " dari " counter(pages);
+                    position: fixed;
+                    bottom: 1rem;
+                    right: 0px;
+                    font-size: 10pt;
+                    font-style: italic;
+                }
+
+                @bottom-left {
+                    content: "Hasil Pemeriksaan Laboratorium 400.7.5./{{ $record->no_pendaftar ?? '-' }}/H/LL/05.3.1/{{ $record->tanggal_pendaftar ? $record->tanggal_pendaftar->format('Y') : now()->format('Y') }}";
+                    position: fixed;
+                    bottom: 1rem;
+                    left: 0px;
+                    font-size: 10pt;
+                    font-style: italic;
+                }
             }
         }
         
         /* Custom Table Styles */
         table { border-collapse: collapse; width: 100%; }
-        /* th, td border handled by Tailwind utility classes */
-        th, td { padding: 4px 6px; }
+        th, td { padding: 2px 4px; }
         th { text-align: center; background-color: white; }
     </style>
 </head>
-<body class="p-8 bg-gray-100">
+<body class="p-8 bg-gray-100 print:p-0">
     <!-- Buttons -->
     <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
         <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Hasil</button>
@@ -49,14 +75,14 @@
     </div>
 
     <!-- Main Paper Content -->
-    <div id="laporan" class="max-w-[210mm] mx-auto bg-white p-0">
+    <div id="laporan" class="max-w-[215mm] mx-auto bg-white p-0 print:max-w-none">
         <!-- HEADER -->
-        <div class="relative border-b-[3px] border-black pb-4 mb-2">
+        <div class="relative border-b-[3px] border-black pb-2 mb-2">
             <!-- Left Logo -->
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Seal_of_Sragen_Regency.svg/250px-Seal_of_Sragen_Regency.svg.png" alt="Logo" class="absolute left-0 top-0 h-[80px] object-contain">
             
             <!-- Right Logo -->
-            <img src="{{ asset('resources/logo/logo-KALK.png') }}" alt="Logo" class="absolute right-0 top-0 h-[80px] object-contain">
+            <img src="https://labkesjabar.com/assets/img/logokalk.png" alt="Logo" class="absolute right-0 top-0 h-[85px] object-contain">
 
             <div class="w-full text-center px-24">
                 <h5 class="uppercase font-bold text-[14px] mb-[2px] leading-tight">Pemerintah Kabupaten Sragen</h5>
@@ -68,12 +94,12 @@
         </div>
 
         <!-- TITLE -->
-        <div class="text-center py-2 mb-4">
+        <div class="text-center py-2 mb-1">
             <h4 class="uppercase font-bold text-[15px]">Hasil Pemeriksaan Laboratorium</h4>
         </div>
 
-        <!-- INFO SECTION -->
-        <div class="px-2 mb-4 text-[13px]">
+        <!-- INFO SECTION (Original Layout) -->
+        <div class="px-2 mb-1 text-[12px]">
             <!-- Row 1: Nomor -->
             <div class="flex mb-1">
                 <div class="w-3/12 flex justify-between pr-2"><span>Nomor</span><span>:</span></div>
@@ -119,7 +145,7 @@
             <!-- Row 8: Waktu Sampling -->
             <div class="flex mb-1">
                 <div class="w-3/12 flex justify-between pr-2"><span>Waktu Sampling</span><span>:</span></div>
-                <div class="w-9/12 pl-2">{{ $record->tanggal_sampling ? \Carbon\Carbon::parse($record->tanggal_sampling)->locale('id')->translatedFormat('d F Y') : '-' }}</div>
+                <div class="w-9/12 pl-2">{{ $record->tanggal_sampling ? \Carbon\Carbon::parse($record->tanggal_sampling)->locale('id')->translatedFormat('d F Y') : '-' }} {{ $record->waktu_sampling ? 'Pukul ' . $record->waktu_sampling . ' WIB' : '' }}</div>
             </div>
 
             <!-- Row 9: Baku Mutu -->
@@ -136,7 +162,7 @@
         </div>
 
         <!-- TABLE SECTION -->
-        <div class="py-2 mb-4" style="padding-top: 0.5rem !important; padding-bottom: 1rem !important;">
+        <div class="py-2 mb-1" style="padding-top: 0.5rem !important; padding-bottom: 1rem !important;">
             <table class="w-full text-[12px] border-collapse" style="border: 1px solid black;">
                 <thead class="bg-gray-300 print:bg-gray-300">
                     <tr style="color: black !important;">
@@ -178,7 +204,7 @@
         </div>
 
         <!-- NOTES SECTION -->
-        <div class="text-[12px] mb-8">
+        <div class="text-[12px] mb-1">
             <span class="font-bold mb-1 block">CATATAN :</span>
             <ol class="list-decimal pl-5 space-y-1">
                 <li>Hasil Pemeriksaan hanya berlaku untuk parameter yang dilaksanakan pengujian laboratorium.</li>
@@ -186,15 +212,15 @@
             </ol>
         </div>
 
-        <!-- FOOTER SIGNATURES -->
-        <div class="pt-4 text-[13px]">
+        <!-- FOOTER SIGNATURES WRAPPED -->
+        <div class="signature-block pt-4 text-[13px]">
             <!-- Date Row -->
             <div class="grid grid-cols-2 mb-4">
                 <div></div> <!-- Spacer -->
                 <div class="text-center">
                     <span>
-                        @if($record->hasilLingkungans->max('created_at'))
-                            Sragen, {{ \Carbon\Carbon::parse($record->hasilLingkungans->max('created_at'))->locale('id')->translatedFormat('d F Y') }}
+                        @if($record->hasilLingkungans->max('tanggal_input'))
+                            Sragen, {{ \Carbon\Carbon::parse($record->hasilLingkungans->max('tanggal_input'))->locale('id')->translatedFormat('d F Y') }}
                         @else
                             Tanggal Input Hasil Belum dimasukan
                         @endif
@@ -203,7 +229,7 @@
             </div>
 
             <!-- Titles -->
-             <div class="grid grid-cols-2 text-center mb-16">
+             <div class="grid grid-cols-2 text-center mb-14">
                 <div>
                     <p class="font-bold">Kepala UPTD Laboratorium Kesehatan</p>
                     <p>Kabupaten Sragen</p>

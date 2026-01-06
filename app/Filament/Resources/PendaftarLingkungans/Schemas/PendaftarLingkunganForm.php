@@ -151,12 +151,13 @@ class PendaftarLingkunganForm
                 ]),
 
             // Data Sampling
-            Grid::make(['default' => 1, 'sm' => 3, 'lg' => 4])
+            Grid::make(['default' => 1, 'sm' => 3, 'lg' => 6])
                 ->schema([
                     TextInput::make('petugas_sampling')
                         ->label('Petugas Sampling')
                         ->required()
                         ->maxLength(128)
+                        ->columnSpan(2)
                         ->placeholder('Nama petugas')
                         ->prefixIcon('heroicon-o-identification')
                         ->extraAttributes(fn (Get $get) => [
@@ -167,6 +168,7 @@ class PendaftarLingkunganForm
                         ->label('Jenis Sampel')
                         ->relationship('jenisSampel', 'nama_sampel')
                         ->required()
+                        ->columnSpan(2)
                         ->searchable()
                         ->preload()
                         ->prefixIcon('heroicon-o-clipboard-document-list')

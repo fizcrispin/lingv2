@@ -28,8 +28,10 @@ class TransaksiForm
                             ->schema([
                                 Select::make('id_pendaftar')
                                     ->label('Pilih Pendaftar')
-                                    ->relationship('pendaftar', 'no_pendaftar')
+                                    ->relationship('pendaftar')
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->no_pendaftar} - {$record->titik_sampling}")
                                     ->required()
+                                    ->inlineLabel()
                                     ->disabled()
                                     ->searchable()
                                     ->placeholder('Pilih berkas pendaftaran...')
@@ -45,10 +47,12 @@ class TransaksiForm
                                 DatePicker::make('tanggal_tagihan')
                                     ->label('Tgl. Tagihan')
                                     ->default(now())
+                                    ->inlineLabel()
                                     ->required(),
                                 Select::make('metode_pembayaran')
                                     ->label('Metode Bayar')
                                     ->required()
+                                    ->inlineLabel()
                                     ->options([
                                         'Bank Transfer' => 'Bank Transfer',
                                         'Tunai' => 'Tunai',
@@ -57,6 +61,7 @@ class TransaksiForm
                                     ]),
                                 TextInput::make('kode_ver')
                                     ->label('Kode Bayar')
+                                    ->inlineLabel()
                                     ->placeholder('Kode Bayar'),
                             ]),
 
@@ -72,7 +77,8 @@ class TransaksiForm
                                         2 => 'Lunas',
                                     ])
                                     ->required()
-                                    ->default(0)
+                                    ->default(1)
+                                    ->inlineLabel()
                                     ->selectablePlaceholder(false),
                                 TextInput::make('total_harga')
                                     ->label('Total Tagihan')
@@ -83,12 +89,14 @@ class TransaksiForm
 
                                 TextInput::make('total_bayar')
                                     ->label('Jumlah Dibayar')
+                                    ->inlineLabel()
                                     ->numeric()
                                     ->prefix('IDR')
                                     ->live(onBlur: true)
                                     ->placeholder('0'),
                                 DatePicker::make('tanggal_bayar')
-                                    ->label('Tgl. Pelunasan'),
+                                    ->label('Tgl. Pelunasan')
+                                    ->inlineLabel(),
                                 Placeholder::make('sisa_tagihan')
                                     ->label('Sisa Tagihan')
                                     ->content(function (Get $get) {
@@ -109,6 +117,7 @@ class TransaksiForm
                             ->schema([
                                 Textarea::make('catatan')
                                     ->label('Catatan Kuitansi')
+                                    ->inlineLabel()
                                     ->rows(2)
                                     ->placeholder('Tambahkan informasi tambahan jika diperlukan...'),
                             ]),
