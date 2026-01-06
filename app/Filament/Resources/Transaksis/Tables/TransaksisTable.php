@@ -149,6 +149,54 @@ class TransaksisTable
                     ->visible(fn ($record) => $record->pendaftar()->exists())
                     ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'faktur']))
                     ->openUrlInNewTab(),
+                Action::make('whatsapp_notif')
+                    ->label('WhatsApp')
+                    ->tooltip('Kirim Notifikasi Tagihan WA')
+                    ->iconButton()
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->pendaftar()->exists() && $record->pendaftar->no_hp)
+                    ->url(function ($record) {
+                        $pendaftar = $record->pendaftar;
+                        $number = $pendaftar->no_hp;
+                        
+                        // Format nomor HP (hapus non-digit, ganti 0 di depan dengan 62)
+                        $number = preg_replace('/[^0-9]/', '', $number);
+                        if (substr($number, 0, 1) === '0') {
+                            $number = '62' . substr($number, 1);
+                        }
+
+                        $name = $pendaftar->nama_pengirim;
+                        $jenisSampel = $pendaftar->jenisSampel->nama_sampel ?? '-';
+                        $titikSampling = $pendaftar->titik_sampling; // Asumsi field ini sudah benar
+                        
+                        // Kode Bayar: ymd + no_pendaftar
+                        // Contoh: 2601061
+                        $dateRef = $pendaftar->tanggal_pendaftar ?? now();
+                        if (is_string($dateRef)) {
+                            $dateRef = \Carbon\Carbon::parse($dateRef);
+                        }
+                        $dateCode = $dateRef->format('ymd');
+                        
+                        $kodeBayar = $dateCode . $pendaftar->no_pendaftar; 
+                        
+                        $totalBiaya = 'Rp. ' . number_format($record->total_harga, 0, ',', '.');
+
+                        $message = "===========================\n" .
+                            "Yth Bapak/Ibu {$name}\n\n" .
+                            "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
+                            "Jenis Sampel : {$jenisSampel}\n" .
+                            "Titik Sampling : {$titikSampling}\n" .
+                            "Kode Bayar : {$kodeBayar}\n" .
+                            "Total Biaya : {$totalBiaya}\n\n" .
+                            "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
+                            "Atas Perhatiannya kami ucapkan terima kasih.\n" .
+                            "===========================";
+
+                        $encodedMessage = urlencode($message);
+                        return "https://wa.me/{$number}?text={$encodedMessage}";
+                    })
+                    ->openUrlInNewTab(),
                 Action::make('cetak_invoice')
                     ->label('Kuitansi')
                     ->tooltip('Cetak Kuitansi Layanan')

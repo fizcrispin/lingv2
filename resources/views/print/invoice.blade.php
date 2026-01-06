@@ -66,7 +66,7 @@
              <!-- Nomor -->
             <div class="flex mb-2 text-xs">
                 <div class="w-3/12 flex justify-between pr-4"><span>Nomor</span><span>:</span></div>
-                <div class="w-9/12">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/F/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
+                <div class="w-9/12">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/K/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
             </div>
 
             <!-- Tanggal Pendaftaran -->
@@ -163,7 +163,7 @@
                 <div class="flex text-xs">
                     <div class="w-5/12">Nomor</div>
                     <div class="w-1/12 text-center">:</div>
-                    <div class="w-6/12 ">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/K/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
+                    <div class="w-6/12 ">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/F/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
                 </div>
                 <div class="flex text-xs">
                     <div class="w-5/12">Jenis Sampel</div>

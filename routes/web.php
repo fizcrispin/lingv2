@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return redirect('/admin');
+});
+
 Route::get('/print/{id}/{type}', function ($id, $type) {
     $record = \App\Models\InvoiceLingkungan::with('pendaftar.paket', 'pendaftar.jenisSampel')->findOrFail($id);
     
