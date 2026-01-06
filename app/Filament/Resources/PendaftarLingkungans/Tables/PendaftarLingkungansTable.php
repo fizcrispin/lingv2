@@ -47,16 +47,17 @@ class PendaftarLingkungansTable
     public static function configure(Table $table): Table
     {
    return $table
+        ->reorderableColumns()
+        ->deferColumnManager(false)
         ->defaultPaginationPageOption(10)
         ->paginated([10, 25, 75, 150, 300])
         ->columns([
             TextColumn::make('no_pendaftar')
-                ->label('No. Pendaftar')
+                ->label('No')
                 ->searchable()
                 ->sortable()
                 ->width('120px')
                 ->weight('bold'),
-
 
             TextColumn::make('tanggal_pendaftar')
                 ->label('Tgl. Daftar')
@@ -81,6 +82,7 @@ class PendaftarLingkungansTable
 
             TextColumn::make('parameter_list')
                 ->label('Parameter')
+                ->toggleable()
                 ->limit(20)
                 ->tooltip(function (\App\Models\PendaftarLingkungan $record) {
                     $allIds = [];
@@ -118,6 +120,7 @@ class PendaftarLingkungansTable
                     return empty($names) ? '-' : implode(', ', $names);
                 }),
                         TextColumn::make('total_harga')
+                            ->toggleable()
                             ->label('Total Biaya')
                             ->money('IDR')
                             ->width('150px')
@@ -134,97 +137,107 @@ class PendaftarLingkungansTable
                             //
                         ])
                         ->recordActions([
+                            Action::make('cetak_label')
+                                ->label('Label')
+                                ->icon('heroicon-o-tag')
+                                ->color('info')
+                                ->iconButton()
+                                ->tooltip('Cetak Label Sampel')
+                                ->url(fn ($record) => route('print.label', $record->id))
+                                ->openUrlInNewTab(),
 
                             EditAction::make()
-                                ->modalWidth('7xl'),
-                Action::make('buat_tagihan')
-                    ->label('Buat Tagihan')
-                    ->icon('heroicon-o-banknotes')
-                    ->color('success')
-                    ->hidden(fn ($record) => $record->invoice()->exists())
-                    ->action(function ($record) {
-                        $record->invoice()->create([
-                            'tanggal_tagihan' => now(),
-                            'total_harga' => $record->total_harga,
-                            'status_bayar' => 1,
-                            'total_bayar' => 0,
-                            'kode_ver' => '',
-                        ]);
-
-                        Notification::make()
-                            ->title('Tagihan Berhasil Dibuat')
-                            ->success()
-                            ->send();
-                    }),
+                                ->modalWidth('5xl')
+                                ->tooltip('Edit Data')
+                                ->label(false),
+                            Action::make('proses_data')
+                                ->label('Proses Data')
+                                ->icon('heroicon-o-cog')
+                                ->color('success')
+                                ->iconButton()
+                                ->tooltip('Proses Data (Buat Ekspedisi, Invoice, & Hasil)')
+                                ->requiresConfirmation()
+                                ->modalHeading('Proses Data Pendaftaran?')
+                                ->modalDescription('Aksi ini akan membuat/memperbarui data Ekspedisi, Invoice, dan Hasil Lingkungan berdasarkan data pendaftaran ini.')
+                                ->modalSubmitActionLabel('Ya, Proses')
+                                ->action(function ($record) {
+                                    $record->processData();
+                                    
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Data Berhasil Diproses')
+                                        ->body('Ekspedisi, Invoice, dan Hasil Lingkungan telah dibuat/diperbarui.')
+                                        ->success()
+                                        ->send();
+                                }),
 
                             DeleteAction::make()
-                            ->iconButton()
-                            ->tooltip('Hapus Data Ini'),
+                                ->iconButton()
+                                ->tooltip('Hapus Data Ini'),
 
-                        // ✅ Custom Duplicate Action untuk Filament v4
+                            // ✅ Custom Duplicate Action untuk Filament v4
                             CreateAction::make('duplicate')
-                            ->icon('heroicon-o-document-duplicate')
-                            ->iconButton()
-                            ->tooltip('Duplikasi data ini')
-                            ->color('success')
-                            ->form([
-                                Forms\Components\TextInput::make('jumlah')
-                                    ->label('Berapa kali ingin menyalin data ini?')
-                                    ->numeric()
-                                    ->default(1)
-                                    ->minValue(1)
-                                    ->maxValue(50)
-                                    ->required()
-                                    ->hint('Maksimal 50 kali')
-                                    ->live()
-                                    ->suffix('kali'),
-                            ])
-                            ->action(function ($record, array $data): void {
-                                $jumlah = min((int) $data['jumlah'], 50);
-                                $total = 0;
+                                ->icon('heroicon-o-document-duplicate')
+                                ->iconButton()
+                                ->tooltip('Duplikasi data ini')
+                                ->color('success')
+                                ->form([
+                                    Forms\Components\TextInput::make('jumlah')
+                                        ->label('Berapa kali ingin menyalin data ini?')
+                                        ->numeric()
+                                        ->default(1)
+                                        ->minValue(1)
+                                        ->maxValue(50)
+                                        ->required()
+                                        ->hint('Maksimal 50 kali')
+                                        ->live()
+                                        ->suffix('kali'),
+                                ])
+                                ->action(function ($record, array $data): void {
+                                    $jumlah = min((int) $data['jumlah'], 50);
+                                    $total = 0;
 
-                                for ($i = 1; $i <= $jumlah; $i++) {
-                                    $new = $record->replicate();
-                                    
-                                    // Ambil daftar nomor pendaftar terbaru setiap iterasi agar tidak bentrok
-                                    $numbers = \App\Models\PendaftarLingkungan::pluck('no_pendaftar')
-                                        ->map(fn($n) => (int) preg_replace('/\D/', '', $n))
-                                        ->filter()
-                                        ->sort()
-                                        ->values();
+                                    for ($i = 1; $i <= $jumlah; $i++) {
+                                        $new = $record->replicate();
+                                        
+                                        // Ambil daftar nomor pendaftar terbaru setiap iterasi agar tidak bentrok
+                                        $numbers = \App\Models\PendaftarLingkungan::pluck('no_pendaftar')
+                                            ->map(fn($n) => (int) preg_replace('/\D/', '', $n))
+                                            ->filter()
+                                            ->sort()
+                                            ->values();
 
-                                    $expected = 1;
-                                    foreach ($numbers as $n) {
-                                        if ($n > $expected) break;
-                                        $expected++;
+                                        $expected = 1;
+                                        foreach ($numbers as $n) {
+                                            if ($n > $expected) break;
+                                            $expected++;
+                                        }
+
+                                        // Atur nomor pendaftar baru yang urut
+                                        $new->no_pendaftar = (string) $expected;
+
+                                        // Tambahkan kembali tanda copy pada titik_sampling
+                                        if (isset($new->titik_sampling)) {
+                                            $new->titik_sampling = "copy{$i}-" . $record->titik_sampling;
+                                        }
+                                        
+                                        $new->save();
+                                        $total++;
                                     }
 
-                                    // Atur nomor pendaftar baru yang urut
-                                    $new->no_pendaftar = (string) $expected;
-
-                                    // Tambahkan kembali tanda copy pada titik_sampling
-                                    if (isset($new->titik_sampling)) {
-                                        $new->titik_sampling = "copy{$i}-" . $record->titik_sampling;
-                                    }
-                                    
-                                    $new->save();
-                                    $total++;
-                                }
-
-                                Notification::make()
-                                    ->title('Berhasil Menduplikasi!')
-                                    ->body("Berhasil menduplikasi {$total} data baru.")
-                                    ->success()
-                                    ->send();
-                            })
-                            ->modalHeading('Duplikasi Data')
-                            ->modalDescription('Masukkan jumlah data yang ingin diduplikasi')
-                            ->modalSubmitActionLabel('Proses Duplikasi')
-                            ->modalIcon('heroicon-o-document-duplicate')
-                            ->modalWidth('md')
-                            ->requiresConfirmation(false), // Ubah ke true jika ingin konfirmasi tambahan
-
+                                    Notification::make()
+                                        ->title('Berhasil Menduplikasi!')
+                                        ->body("Berhasil menduplikasi {$total} data baru.")
+                                        ->success()
+                                        ->send();
+                                })
+                                ->modalHeading('Duplikasi Data')
+                                ->modalDescription('Masukkan jumlah data yang ingin diduplikasi')
+                                ->modalSubmitActionLabel('Proses Duplikasi')
+                                ->modalIcon('heroicon-o-document-duplicate')
+                                ->modalWidth('md')
+                                ->requiresConfirmation(false), 
                         ])
+                        ->actionsPosition(\Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)
                         ->toolbarActions([
                             BulkActionGroup::make([
                                 DeleteBulkAction::make(),

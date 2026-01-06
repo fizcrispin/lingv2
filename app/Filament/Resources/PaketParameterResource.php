@@ -12,6 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+
 class PaketParameterResource extends Resource
 {
     protected static ?string $model = PaketParameter::class;
@@ -36,11 +39,13 @@ class PaketParameterResource extends Resource
                     ->label('Regulasi')
                     ->options(\App\Models\Regulasi::pluck('nama_regulasi', 'id'))
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('parameter', [])),
                 Forms\Components\Select::make('parameter')
                     ->label('Parameter')
                     ->multiple()
-                    ->options(\App\Models\ParameterLingkungan::pluck('nama_parameter', 'id'))
+                    ->options(fn (Get $get) => \App\Models\ParameterLingkungan::where('id_regulasi', $get('id_regulasi'))->pluck('nama_parameter', 'id'))
                     ->searchable()
                     ->preload()
                     ->live()
@@ -51,6 +56,22 @@ class PaketParameterResource extends Resource
                     ->label('Total Harga')
                     ->numeric()
                     ->prefix('Rp'),
+                Forms\Components\ToggleButtons::make('option')
+                    ->label('Status')
+                    ->options([
+                        '2' => 'Aktif',
+                        '1' => 'Tidak Aktif',
+                    ])
+                    ->colors([
+                        '2' => 'success',
+                        '1' => 'danger',
+                    ])
+                    ->icons([
+                        '2' => 'heroicon-o-check-circle',
+                        '1' => 'heroicon-o-x-circle',
+                    ])
+                    ->default('2')
+                    ->inline(),
             ]);
     }
 
@@ -68,6 +89,20 @@ class PaketParameterResource extends Resource
                 Tables\Columns\TextColumn::make('total_harga')
                     ->label('Total Harga')
                     ->money('IDR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('option')
+                    ->label('Option')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        '1' => 'Tidak Aktif',
+                        '2' => 'Aktif',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        '1' => 'danger',
+                        '2' => 'success',
+                        default => 'gray',
+                    })
                     ->sortable(),
             ])
             ->filters([

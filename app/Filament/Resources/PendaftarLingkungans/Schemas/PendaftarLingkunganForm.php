@@ -248,16 +248,11 @@ class PendaftarLingkunganForm
                     }
                 })
                 ->afterStateUpdated(function (bool $state, Set $set, $record) {
-                    if (!$record instanceof \App\Models\PendaftarLingkungan) return;
-
                     if ($state) { // Manual
-                        $record->updateQuietly(['paket_id' => null]);
                         $set('paket_id', null);
                     } else { // Paket
-                        $record->updateQuietly(['parameter' => null]);
                         $set('parameter', null);
                     }
-                    $record->refreshRelatedRecords();
                 }),
 
 
@@ -278,13 +273,6 @@ class PendaftarLingkunganForm
                                     ->live()
                                     ->prefixIcon('heroicon-o-cube')
                 ->afterStateUpdated(function ($state, Set $set, $record) {
-                    if ($record instanceof \App\Models\PendaftarLingkungan) {
-                        $record->updateQuietly([
-                            'paket_id' => $state,
-                            'parameter' => null
-                        ]);
-                        $record->refreshRelatedRecords();
-                    }
                     if (!empty($state)) {
                         $set('parameter', null);
                         $set('mode_parameter', false);
@@ -364,13 +352,6 @@ class PendaftarLingkunganForm
                                         ->live()
                                         ->prefixIcon('heroicon-o-list-bullet')
                 ->afterStateUpdated(function ($state, Set $set, $record) {
-                    if ($record instanceof \App\Models\PendaftarLingkungan) {
-                        $record->updateQuietly([
-                            'parameter' => $state,
-                            'paket_id' => null
-                        ]);
-                        $record->refreshRelatedRecords();
-                    }
                     if (!empty($state)) {
                         $set('paket_id', null);
                         $set('mode_parameter', true);

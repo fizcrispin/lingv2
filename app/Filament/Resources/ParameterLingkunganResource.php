@@ -56,6 +56,9 @@ class ParameterLingkunganResource extends Resource
                     ->label('Nama Parameter')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('regulasi.nama_regulasi')
+                    ->label('Nama Regulasi')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kategoriData.nama_kategori') // Model has 'kategoriData' relation
                     ->label('Kategori')
                     ->sortable(), 

@@ -30,6 +30,7 @@ class TransaksiForm
                                     ->label('Pilih Pendaftar')
                                     ->relationship('pendaftar', 'no_pendaftar')
                                     ->required()
+                                    ->disabled()
                                     ->searchable()
                                     ->placeholder('Pilih berkas pendaftaran...')
                                     ->live()
@@ -47,14 +48,16 @@ class TransaksiForm
                                     ->required(),
                                 Select::make('metode_pembayaran')
                                     ->label('Metode Bayar')
+                                    ->required()
                                     ->options([
-                                        'Transfer' => 'Transfer Bank',
-                                        'Tunai' => 'Tunai / Cash',
+                                        'Bank Transfer' => 'Bank Transfer',
+                                        'Tunai' => 'Tunai',
+                                        'QRIS' => 'QRIS',
                                         'Lainnya' => 'Lainnya',
                                     ]),
                                 TextInput::make('kode_ver')
-                                    ->label('No. Referensi')
-                                    ->placeholder('TRX-XXXXX'),
+                                    ->label('Kode Bayar')
+                                    ->placeholder('Kode Bayar'),
                             ]),
 
                         // Seksi Kanan: Pelunasan & Keuangan
@@ -66,7 +69,7 @@ class TransaksiForm
                                     ->options([
                                         0 => 'Draft',
                                         1 => 'Menunggu Pembayaran',
-                                        2 => 'Lunas (Selesai)',
+                                        2 => 'Lunas',
                                     ])
                                     ->required()
                                     ->default(0)
@@ -102,11 +105,12 @@ class TransaksiForm
 
                         Section::make('Catatan')
                             ->columnSpan(12)
+                            ->collapsed()
                             ->schema([
                                 Textarea::make('catatan')
                                     ->label('Catatan Kuitansi')
                                     ->rows(2)
-                                    ->placeholder('Tambahkan informasi tambahan jika ada...'),
+                                    ->placeholder('Tambahkan informasi tambahan jika diperlukan...'),
                             ]),
                     ]),
             ])

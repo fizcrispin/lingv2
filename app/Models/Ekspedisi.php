@@ -22,6 +22,6 @@ class Ekspedisi extends Model
 
     public function pendaftarLingkungan(): BelongsTo
     {
-        return $this->belongsTo(PendaftarLingkungan::class, 'no_pendaftar', 'no_pendaftar');
+        return $this->belongsTo(PendaftarLingkungan::class, 'id_pendaftar');
     }
 }

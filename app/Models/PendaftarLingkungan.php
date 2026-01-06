@@ -16,12 +16,8 @@ class PendaftarLingkungan extends Model
 
     protected static function booted()
     {
-        static::created(function ($model) {
-             $model->ekspedisi()->create([
-                 'no_pendaftar' => $model->no_pendaftar,
-             ]);
-        });
-
+        // static::created removed to prevent auto-creation of Ekspedisi
+    
         static::deleting(function ($model) {
             $model->ekspedisi()->delete();
             $model->invoice()->delete(); // Hapus Invoice (Transaksi)
@@ -45,9 +41,26 @@ class PendaftarLingkungan extends Model
         });
     }
 
+    /**
+     * Manual Trigger to Process Data (Ekspedisi, Invoice, Hasil)
+     */
+    public function processData()
+    {
+        // 1. Create Ekspedisi if not exists
+        if (!$this->ekspedisi()->exists()) {
+            $this->ekspedisi()->create([
+                'id_pendaftar' => $this->id,
+            ]);
+        }
+        
+        // 2. Refresh/Create Invoice & Hasil Lingkungan
+        $this->refreshRelatedRecords();
+    }
+
+
     public function ekspedisi(): HasOne
     {
-        return $this->hasOne(Ekspedisi::class, 'no_pendaftar', 'no_pendaftar');
+        return $this->hasOne(Ekspedisi::class, 'id_pendaftar');
     }
 
 

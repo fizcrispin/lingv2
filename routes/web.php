@@ -6,6 +6,11 @@ Route::get('/', function () {
     return redirect('/admin');
 });
 
+Route::get('/print/label/{id}', function ($id) {
+    $record = \App\Models\PendaftarLingkungan::with('jenisSampel')->findOrFail($id);
+    return view('print.label', compact('record'));
+})->name('print.label');
+
 Route::get('/print/{id}/{type}', function ($id, $type) {
     $record = \App\Models\InvoiceLingkungan::with('pendaftar.paket', 'pendaftar.jenisSampel')->findOrFail($id);
     
@@ -60,6 +65,8 @@ Route::get('/print/{id}/{type}', function ($id, $type) {
         'terbilang' => ucwords(trim($terbilang($record->total_harga ?? 0))) . " Rupiah",
     ]);
 })->name('print.transaksi');
+
+
 
 Route::get('/input-hasil/{record}/cetak', App\Http\Controllers\CetakHasilController::class)->name('cetak.hasil');
 

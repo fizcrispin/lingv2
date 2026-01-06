@@ -10,6 +10,7 @@ use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
@@ -25,6 +26,7 @@ class InputHasilResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationLabel = 'Hasil Laboratorium';
+    
     protected static ?string $slug = 'hasil-lab';
 
     public static function form(Schema $schema): Schema
@@ -35,15 +37,24 @@ class InputHasilResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('hasilLingkungans');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
+        ->reorderableColumns()
+        ->deferColumnManager(true)
+        ->columns([
                 Tables\Columns\TextColumn::make('no_pendaftar')
-                    ->label('No. Pendaftar')
+                    ->label('Nomor')
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
+                    ->toggleable()
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tgl. Daftar')

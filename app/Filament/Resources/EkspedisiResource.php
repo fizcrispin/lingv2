@@ -36,12 +36,12 @@ class EkspedisiResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         \Filament\Schemas\Components\Group::make()->schema([
-                            Forms\Components\TextInput::make('no_pendaftar_view')
+                            Forms\Components\TextInput::make('id_pendaftar_view')
                                 ->label('Nomor')
                                 ->prefixIcon('heroicon-o-hashtag')
                                 ->disabled()
                                 ->dehydrated(false)
-                                ->formatStateUsing(fn ($record) => $record?->pendaftarLingkungan?->no_pendaftar ?? '-')
+                                ->formatStateUsing(fn ($record) => $record?->pendaftarLingkungan?->id_pendaftar ?? '-')
                                 ->extraInputAttributes(fn ($state) => ['title' => $state]),
 
                             Forms\Components\TextInput::make('tanggal_pendaftar_view')
@@ -132,7 +132,7 @@ class EkspedisiResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('no_pendaftar')
+                Tables\Columns\TextColumn::make('pendaftarLingkungan.no_pendaftar')
                     ->label('Nomor')
                     ->searchable()
                     ->sortable()
