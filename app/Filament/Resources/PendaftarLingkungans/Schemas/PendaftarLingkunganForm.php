@@ -20,7 +20,6 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextInputColumn;
-
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Components\Utilities\Get;
@@ -54,7 +53,6 @@ class PendaftarLingkunganForm
             // Status & Informasi Pendaftar
             Grid::make(['default' => 1, 'sm' => 2, 'lg' => 3])
                 ->schema([
-
                             TextInput::make('no_pendaftar')
                                 ->label('No. Pendaftar')
                                 ->required()

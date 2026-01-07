@@ -1,3 +1,10 @@
+@php
+    // --- KONFIGURASI KERTAS & MARGIN (Hasil Lab) ---
+    $paperSize = '215mm 330mm'; // Ukuran Kertas (F4). Contoh: 'A4', 'Legal', 'Letter'
+    $pageMargin = '1.5cm';       // Margin Halaman (Cetak)
+    $bodyPadding = '2rem';       // Padding Konten dalam kertas
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,13 +38,13 @@
                 display: none; 
             }
             body { 
-                padding: 0; 
-                margin: 0; 
+                padding: 0 !important; 
+                margin: 0 !important; 
             }
             @page { 
-                /* F4 Size (215mm x 330mm) */
-                size: 215mm 330mm; 
-                margin: 1.5cm; 
+                /* Ukuran Kertas Custom */
+                size: {{ $paperSize }}; 
+                margin: {{ $pageMargin }}; 
             }
 
             @page {
@@ -67,7 +74,8 @@
         th { text-align: center; background-color: white; }
     </style>
 </head>
-<body class="p-8 bg-gray-100 print:p-0">
+</head>
+<body class="bg-gray-100" style="padding: {{ $bodyPadding }}">
     <!-- Buttons -->
     <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
         <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Hasil</button>

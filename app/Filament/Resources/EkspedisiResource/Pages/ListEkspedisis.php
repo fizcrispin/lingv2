@@ -30,6 +30,21 @@ class ListEkspedisis extends ListRecords
                 ->modifyQueryUsing(fn ($query) => $query->where('sampel_diterima', true))
                 ->badge(fn () => Ekspedisi::where('sampel_diterima', true)->count())
                 ->badgeColor('info'),
+            'selesai_input' => Tab::make('Selesai Input')
+                ->modifyQueryUsing(fn ($query) => $query->whereHas('pendaftarLingkungan', function ($q) {
+                    $q->whereHas('hasilLingkungans')
+                      ->whereDoesntHave('hasilLingkungans', function ($q2) {
+                          $q2->whereNull('hasil_parameter')->orWhere('hasil_parameter', '');
+                      });
+                }))
+                ->badge(fn () => Ekspedisi::whereHas('pendaftarLingkungan', function ($q) {
+                    $q->whereHas('hasilLingkungans')
+                      ->whereDoesntHave('hasilLingkungans', function ($q2) {
+                          $q2->whereNull('hasil_parameter')->orWhere('hasil_parameter', '');
+                      });
+                })->count())
+                ->badgeColor('success')
+                ->icon('heroicon-m-check-circle'),
             'verif_hasil' => Tab::make('Verif Hasil')
                 ->modifyQueryUsing(fn ($query) => $query->where('verifikasi_hasil', true))
                 ->badge(fn () => Ekspedisi::where('verifikasi_hasil', true)->count())

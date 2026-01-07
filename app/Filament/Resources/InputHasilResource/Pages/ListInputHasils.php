@@ -12,6 +12,11 @@ class ListInputHasils extends ListRecords
 {
     protected static string $resource = InputHasilResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Hasil Laboratorium Lingkungan';
+    }
+
     public function getTabs(): array
     {
         return [

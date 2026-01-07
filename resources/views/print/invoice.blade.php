@@ -1,9 +1,16 @@
+@php
+    // --- KONFIGURASI KERTAS & MARGIN (Faktur / Kuitansi) ---
+    $paperSize = '210mm 297mm'; // Ukuran Kertas (A4 Portrait). Contoh: '215mm 330mm' (F4), 'Letter', 'auto'
+    $pageMargin = '1cm';         // Margin Halaman (Cetak)
+    $bodyPadding = '2rem';       // Padding Konten dalam kertas (jarak isi dari tepi)
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} - {{ $record->pendaftar->no_pendaftar ?? 'Transaksi' }}</title>
+    <title>{{ $record->pendaftar->no_pendaftar ?? 'Transaksi' }}-{{ $record->pendaftar->nama_pengirim ?? '-' }}-{{ $title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
@@ -26,18 +33,19 @@
             }
 
             body { 
-                padding: 0; 
-                margin: 0; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                background: white;
             }
 
             @page { 
-                margin: 1cm; 
-                size: auto; 
+                margin: {{ $pageMargin }}; 
+                size: {{ $paperSize }}; 
             }
         }
     </style>
 </head>
-<body class="p-8 bg-gray-100">
+<body class="bg-gray-100" style="padding: {{ $bodyPadding }}">
     <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
         <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Dokumen</button>
         <button class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 font-sans" onclick="window.close()">Tutup</button>
@@ -124,8 +132,10 @@
                 <div>
                      <p>Mengetahui</p>
                      <p class="mb-16">Bendahara Penerimaan BLUD</p>
-                     <p class="font-bold underline">MEITA KINANTHI, A.Md.</p>
-                     <p>NIP. 19950523 202421 2 028</p>
+                     <p class="font-bold underline">
+                        HENI ISDARYANTI,AM.AK
+                     </p>
+                     <p>NIP. 19780130 202121 2 004</p>
                 </div>
 
                 <!-- Right Sig -->

@@ -47,6 +47,7 @@ class PendaftarLingkungansTable
     public static function configure(Table $table): Table
     {
    return $table
+
         ->reorderableColumns()
         ->deferColumnManager(false)
         ->defaultPaginationPageOption(10)
@@ -147,7 +148,7 @@ class PendaftarLingkungansTable
                     ])
 
                         ->modifyQueryUsing(function ($query) {
-                            $query->whereRaw("no_pendaftar REGEXP '^[0-9]+$'") // filter hanya angka
+                            $query->whereRaw("no_pendaftar REGEXP '^[0-9]+$'")
                                 ->orderByRaw('CAST(no_pendaftar AS UNSIGNED) DESC')
                                 ->orderByDesc('created_at');
                         })
@@ -257,6 +258,36 @@ class PendaftarLingkungansTable
                         ->toolbarActions([
                             BulkActionGroup::make([
                                 DeleteBulkAction::make(),
+                                BulkAction::make('proses_data')
+                                    ->label('Proses Data')
+                                    ->icon('heroicon-o-cog')
+                                    ->color('success')
+                                    ->requiresConfirmation()
+                                    ->modalHeading('Proses Data Terpilih?')
+                                    ->modalDescription('Aksi ini akan memproses semua data pendaftaran yang dipilih.')
+                                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                                        $count = 0;
+                                        foreach ($records as $record) {
+                                            $record->processData();
+                                            $count++;
+                                        }
+                                        
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('Bulk Proses Berhasil')
+                                            ->body("{$count} data telah diproses.")
+                                            ->success()
+                                            ->send();
+                                    }),
+                                BulkAction::make('cetak_label')
+                                    ->label('Cetak Label')
+                                    ->icon('heroicon-o-tag')
+                                    ->color('info')
+                                    ->deselectRecordsAfterCompletion()
+                                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire) {
+                                        $ids = $records->pluck('id')->implode(',');
+                                        $url = route('print.label.bulk', ['ids' => $ids]);
+                                        $livewire->js("window.open('{$url}', '_blank')");
+                                    }),
                             ]),
                         ]);
                 }

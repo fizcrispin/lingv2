@@ -12,6 +12,7 @@ use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
+use Illuminate\Database\Eloquent\Builder;
 
 use BackedEnum;
 
@@ -41,7 +42,7 @@ class EkspedisiResource extends Resource
                                 ->prefixIcon('heroicon-o-hashtag')
                                 ->disabled()
                                 ->dehydrated(false)
-                                ->formatStateUsing(fn ($record) => $record?->pendaftarLingkungan?->id_pendaftar ?? '-')
+                                ->formatStateUsing(fn ($record) => $record?->pendaftarLingkungan?->no_pendaftar ?? '-')
                                 ->extraInputAttributes(fn ($state) => ['title' => $state]),
 
                             Forms\Components\TextInput::make('tanggal_pendaftar_view')
@@ -131,6 +132,12 @@ class EkspedisiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->leftJoin('pendaftar_lingkungan', 'ekspedisi.id_pendaftar', '=', 'pendaftar_lingkungan.id')
+                    ->select('ekspedisi.*')
+                    ->whereRaw("pendaftar_lingkungan.no_pendaftar REGEXP '^[0-9]+$'")
+                    ->orderByRaw('CAST(pendaftar_lingkungan.no_pendaftar AS UNSIGNED) DESC');
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('pendaftarLingkungan.no_pendaftar')
                     ->label('Nomor')

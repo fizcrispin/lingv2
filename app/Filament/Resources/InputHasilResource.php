@@ -16,7 +16,7 @@ use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
 
 class InputHasilResource extends Resource
-{
+{   
     protected static ?string $model = PendaftarLingkungan::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
@@ -76,7 +76,11 @@ class InputHasilResource extends Resource
                     ->tooltip(fn ($record) => $record->titik_sampling)
                     ->placeholder('-'),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->modifyQueryUsing(function ($query) {
+                $query->whereRaw("no_pendaftar REGEXP '^[0-9]+$'")
+                    ->orderByRaw('CAST(no_pendaftar AS UNSIGNED) DESC')
+                    ->orderByDesc('created_at');
+            })
             ->filters([
                 //
             ])

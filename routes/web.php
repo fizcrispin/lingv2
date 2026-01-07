@@ -45,8 +45,8 @@ Route::middleware('auth')->group(function () {
         }
 
         $titles = [
-            'faktur' => 'Faktur Penagihan',
-            'kuitansi' => 'Kuitansi Layanan',
+            'faktur' => 'Invoice',
+            'kuitansi' => 'Kuitansi',
             'bukti_bayar' => 'Bukti Pembayaran / Kuitansi',
         ];
         
@@ -75,4 +75,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/input-hasil/{record}/cetak', App\Http\Controllers\CetakHasilController::class)->name('cetak.hasil');
 
     Route::get('/cetak/hasil-bulk', App\Http\Controllers\BulkCetakHasilController::class)->name('cetak.hasil.bulk');
+    Route::get('/cetak/label-bulk', App\Http\Controllers\BulkCetakLabelController::class)->name('print.label.bulk');
 });

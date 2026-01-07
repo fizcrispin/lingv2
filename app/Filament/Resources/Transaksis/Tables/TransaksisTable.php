@@ -21,6 +21,12 @@ class TransaksisTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->leftJoin('pendaftar_lingkungan', 'invoice_lingkungan.id_pendaftar', '=', 'pendaftar_lingkungan.no_pendaftar')
+                    ->select('invoice_lingkungan.*')
+                    ->whereRaw("pendaftar_lingkungan.no_pendaftar REGEXP '^[0-9]+$'")
+                    ->orderByRaw('CAST(pendaftar_lingkungan.no_pendaftar AS UNSIGNED) DESC');
+            })
             ->columns([
                 TextColumn::make('pendaftar.no_pendaftar')
                     ->label('Nomor')
