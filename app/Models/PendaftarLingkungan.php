@@ -22,6 +22,7 @@ class PendaftarLingkungan extends Model
             $model->ekspedisi()->delete();
             $model->invoice()->delete(); // Hapus Invoice (Transaksi)
             $model->hasilLingkungans()->delete(); // Hapus Hasil Lab
+            $model->statusData()->delete(); // Hapus Status (Notifikasi/Dokumen)
         });
 
         static::saving(function ($model) {
@@ -279,7 +280,7 @@ class PendaftarLingkungan extends Model
             }
         }
     }
-    public function status(): HasOne
+    public function statusData(): HasOne
     {
         return $this->hasOne(Status::class, 'id_pendaftar');
     }

@@ -301,6 +301,116 @@ class InputHasilResource extends Resource
                         }
                         return $record;
                     }),
+                \Filament\Actions\Action::make('status')
+                    ->icon('heroicon-o-flag')
+                    ->color('warning')
+                    ->label(false)
+                    ->tooltip('Update Status')
+                    ->modalHeading('Update Status Dokumen')
+                    ->form([
+                        \Filament\Schemas\Components\Section::make('Notifikasi Pelanggan')
+                            ->schema([
+                                \Filament\Schemas\Components\Actions::make([
+                                    \Filament\Actions\Action::make('kirim_wa')
+                                        ->label('Kirim Notifikasi WA')
+                                        ->icon('heroicon-o-chat-bubble-left-right')
+                                        ->color('success')
+                                        ->action(function ($record, \Livewire\Component $livewire) {
+                                            // 1. Update DB (Set notifikasi = 1)
+                                            $record->statusData()->updateOrCreate(
+                                                ['id_pendaftar' => $record->id],
+                                                ['notifikasi' => '1']
+                                            );
+
+                                            // 2. Prepare WA URL
+                                            $phone = $record->no_hp;
+                                            if (empty($phone)) {
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('Nomor HP tidak tersedia')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            // Format 08x -> 628x
+                                            if (substr(trim($phone), 0, 1) === '0') {
+                                                $phone = '62' . substr(trim($phone), 1);
+                                            }
+
+                                            // Data for Template
+                                            $name = $record->nama_pengirim;
+                                            $jenisSampel = $record->jenisSampel->nama_sampel ?? '-';
+                                            $titikSampling = $record->titik_sampling ?? '-';
+
+                                            $message = "===========================\n" .
+                                                       "Yth Bapak/Ibu {$name}\n\n" .
+                                                       "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan bahwa pemeriksaan lab anda telah selesai.\n\n" .
+                                                       "Jenis Sampel : {$jenisSampel}\n" .
+                                                       "Titik Sampling : {$titikSampling}\n\n" .
+                                                       "Lembar hasil pemeriksaan dapat segera diambil dengan menunjukan bukti pembayaran.\n\n" .
+                                                       "Atas Perhatiannya kami ucapkan terima kasih.\n" .
+                                                       "===========================";
+
+                                            $url = "https://wa.me/{$phone}?text=" . urlencode($message);
+
+                                            $livewire->js("window.open('$url', '_blank')");
+                                        })
+                                ])
+                                ->fullWidth(),
+                                \Filament\Forms\Components\Placeholder::make('info_notif')
+                                    ->label('Status Notifikasi')
+                                    ->content(fn ($record) => $record->statusData?->notifikasi == '1' ? 'Sudah Dikirim (1)' : 'Belum Dikirim')
+                                    ->inlineLabel(),
+                            ]),
+
+                        \Filament\Schemas\Components\Grid::make(1)->schema([
+                            \Filament\Forms\Components\Toggle::make('dicetak')
+                                ->label('Sudah Dicetak?')
+                                ->inline(false),
+
+                            \Filament\Schemas\Components\Group::make([
+                                \Filament\Forms\Components\Toggle::make('diambil')
+                                    ->label('Sudah Diambil?')
+                                    ->live()
+                                    ->inline(false),
+
+                                \Filament\Forms\Components\TextInput::make('pengambil')
+                                    ->label('Nama Pengambil')
+                                    ->visible(fn ($get) => $get('diambil')),
+                                
+                                \Filament\Forms\Components\DateTimePicker::make('tanggal_diambil')
+                                    ->label('Tanggal Pengambilan')
+                                    ->visible(fn ($get) => $get('diambil')),
+                            ])->columns(3),
+                            
+                            \Filament\Forms\Components\Textarea::make('keterangan')
+                                ->label('Keterangan Tambahan')
+                                ->rows(3),
+                        ])
+                    ])
+                    ->fillForm(fn (PendaftarLingkungan $record): array => [
+                        'dicetak' => $record->statusData?->dicetak ?? false,
+                        'diambil' => $record->statusData?->diambil ?? false,
+                        'pengambil' => $record->statusData?->pengambil,
+                        'tanggal_diambil' => $record->statusData?->tanggal_diambil,
+                        'keterangan' => $record->statusData?->keterangan,
+                    ])
+                    ->action(function (PendaftarLingkungan $record, array $data): void {
+                        $record->statusData()->updateOrCreate(
+                            ['id_pendaftar' => $record->id],
+                            [
+                                'dicetak' => $data['dicetak'] ?? false,
+                                'diambil' => $data['diambil'] ?? false,
+                                'pengambil' => $data['pengambil'] ?? null,
+                                'tanggal_diambil' => $data['tanggal_diambil'] ?? null,
+                                'keterangan' => $data['keterangan'] ?? null,
+                            ]
+                        );
+                        \Filament\Notifications\Notification::make()
+                            ->title('Status Berhasil Disimpan')
+                            ->success()
+                            ->send();
+                    }),
                 \Filament\Actions\Action::make('cetak')
                     ->iconButton()
                     ->tooltip('Cetak Hasil')
