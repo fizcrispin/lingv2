@@ -279,4 +279,8 @@ class PendaftarLingkungan extends Model
             }
         }
     }
+    public function status(): HasOne
+    {
+        return $this->hasOne(Status::class, 'id_pendaftar');
+    }
 }

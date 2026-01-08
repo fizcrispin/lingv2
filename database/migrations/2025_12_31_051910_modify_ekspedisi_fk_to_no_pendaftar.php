@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ekspedisi', function (Blueprint $table) {
-            // 1. Drop old foreign key and column
-            // Note: constraint name is usually table_column_foreign
-            $table->dropForeign(['pendaftar_lingkungan_id']);
-            $table->dropColumn('pendaftar_lingkungan_id');
+        // Schema::table('ekspedisi', function (Blueprint $table) {
+        //     // 1. Drop old foreign key and column
+        //     // Note: constraint name is usually table_column_foreign
+        //     // $table->dropForeign(['pendaftar_lingkungan_id']);
+        //     // $table->dropColumn('pendaftar_lingkungan_id');
 
-            // 2. Add new column referencing no_pendaftar
-            // We use string because no_pendaftar in parent is string
-            $table->string('no_pendaftar')->nullable()->after('id');
-            // Adding index for performance
-            $table->index('no_pendaftar');
-        });
+        //     // 2. Add new column referencing no_pendaftar
+        //     // We use string because no_pendaftar in parent is string
+        //     // $table->string('no_pendaftar')->nullable()->after('id');
+        //     // Adding index for performance
+        //     // $table->index('no_pendaftar');
+        // // });
     }
 
     /**

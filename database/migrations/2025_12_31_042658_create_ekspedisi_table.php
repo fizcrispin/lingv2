@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ekspedisi', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pendaftar_lingkungan_id')
-                ->constrained('pendaftar_lingkungan')
-                ->cascadeOnDelete();
-            $table->boolean('sampel_diterima')->default(false);
-            $table->dateTime('tanggal_diterima')->nullable();
-            $table->string('verifikasi_hasil')->nullable();
-            $table->string('validasi1')->nullable();
-            $table->string('validasi2')->nullable();
-            $table->boolean('sampel_dimusnahkan')->default(false);
-            $table->timestamps();
-        });
+        // Schema::create('ekspedisi', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('pendaftar_lingkungan_id')
+        //         ->constrained('pendaftar_lingkungan')
+        //         ->cascadeOnDelete();
+        //     $table->boolean('sampel_diterima')->default(false);
+        //     $table->dateTime('tanggal_diterima')->nullable();
+        //     $table->string('verifikasi_hasil')->nullable();
+        //     $table->string('validasi1')->nullable();
+        //     $table->string('validasi2')->nullable();
+        //     $table->boolean('sampel_dimusnahkan')->default(false);
+        //     $table->timestamps();
+        // });
     }
 
     /**

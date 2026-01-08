@@ -1,8 +1,8 @@
 @php
     // --- KONFIGURASI KERTAS & MARGIN (Faktur / Kuitansi) ---
     $paperSize = '215mm 330mm'; // Ukuran Kertas (F4 Portrait). Contoh: '215mm 330mm' (F4), 'Letter', 'auto'
-    $pageMargin = '1cm';         // Margin Halaman (Cetak)
-    $bodyPadding = '2rem';       // Padding Konten dalam kertas (jarak isi dari tepi)
+    $pageMargin = '1rem';         // Margin Halaman (Cetak)
+    $bodyPadding = '1rem';       // Padding Konten dalam kertas (jarak isi dari tepi)
 @endphp
 
 <!DOCTYPE html>
@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $record->pendaftar->no_pendaftar ?? 'Transaksi' }}-{{ $record->pendaftar->nama_pengirim ?? '-' }}-{{ $title }}</title>
+    <title>{{ $record->pendaftar->no_pendaftar ?? 'Transaksi' }}-{{ $record->pendaftar->nama_pengirim ?? '-' }}-{{ $record->pendaftar->titik_sampling ?? '-' }}-{{ $title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
@@ -33,8 +33,8 @@
             }
 
             body { 
-                padding: 0 !important; 
-                margin: 0 !important; 
+                padding: 1mm !important; 
+                margin: 1mm !important; 
                 background: white;
             }
 
@@ -81,7 +81,7 @@
             <div class="flex mb-1 text-xs">
                 <div class="w-3/12 flex justify-between pr-4"><span>Tanggal Pendaftaran</span><span>:</span></div>
                 <div class="w-9/12">
-                    {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('d/m/Y') : '-' }} 
+                    {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->locale('id')->translatedFormat('d F Y') : '-' }}
                 </div>
             </div>
 
@@ -103,7 +103,11 @@
              <div class="flex mb-1 text-xs">
                 <div class="w-3/12 flex justify-between pr-1"><span>Untuk Pembayaran</span><span>:</span></div>
                 <div class="w-9/12">
-                    Pemeriksaan Sampel {{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}
+                    Pemeriksaan Laboratorium Lingkungan
+                    <br>
+                    <span class="text-[12px]">
+                        {{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }} : {{ $record->pendaftar->titik_sampling ?? '-' }}
+                    </span>
                     <br>
                     <span class="italic text-[11px]">
                         ({{ $parameters->pluck('nama_parameter')->join(', ') }})

@@ -168,14 +168,14 @@
                     @forelse($groupedResults as $kategori => $items)
                         <!-- Category Header -->
                         <tr class="border-b border-gray-400">
-                            <td colspan="6" class="py-1 px-2 font-bold uppercase text-left align-middle border-b border-gray-400 text-black">
+                            <td colspan="6" class="py-1 px-2 font-bold uppercase text-left align-middle border-b border-gray-500 text-black">
                                 {{ $kategori }}
                             </td>
                         </tr>
                         
                         @php $idx = 1; @endphp
                         @foreach($items as $hasil)
-                        <tr class="border-b border-gray-300">
+                        <tr class="border-b border-gray-500">
                             <td class="py-0 px-0 text-center align-middle text-[12px]">{{ $idx++ }}</td>
                             <td class="py-0 px-0 align-middle text-[12px] pl-4">{{ $hasil->nama_parameter }}</td>
                             <td class="py-0 px-0 text-center align-middle font-bold text-[12px]">{{ $hasil->hasil_parameter ?? '' }}</td>

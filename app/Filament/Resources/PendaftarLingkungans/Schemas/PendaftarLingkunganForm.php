@@ -219,7 +219,7 @@ class PendaftarLingkunganForm
                 ]),
 
             // Parameter & Regulasi
-            Grid::make(['default' => 1, 'lg' => 4])
+            Grid::make(['default' => 1, 'lg' => 8])
                 ->schema([
 
                     // Pilihan Regulasi
@@ -242,157 +242,187 @@ class PendaftarLingkunganForm
                             'title' => 'Regulasi: ' . (\App\Models\Regulasi::find($get('regulasi_id'))?->nama_regulasi ?: '-'),
                         ]),
 
+                    // Tombol Reset Parameter
+                    \Filament\Schemas\Components\Actions::make([
+                        \Filament\Actions\Action::make('reset_parameter')
+                            ->label(false)
+                            ->tooltip('Reset Parameter & Hapus Data Proses')
+                            ->icon('heroicon-s-arrow-path')
+                            ->color('danger')
+                            ->requiresConfirmation()
+                            ->modalHeading('Reset Parameter & Hapus Data?')
+                            ->modalDescription('Aksi ini akan MENGHAPUS pilihan parameter/paket SERTA menghapus data Ekspedisi, Invoice, dan Hasil Lab yang sudah terbentuk. Data tidak dapat dikembalikan.')
+                            ->action(function ($record, Set $set) {
+                                if (!$record) return;
+
+                                // 1. Hapus Data Terkait
+                                $record->ekspedisi()->delete();
+                                $record->invoice()->delete();
+                                $record->hasilLingkungans()->delete();
+
+                                // 2. Reset Kolom di Database
+                                $record->update([
+                                    'paket_id' => null,
+                                    'parameter' => null, 
+                                ]);
+
+                                // 3. Sinkronisasi State Form
+                                $set('paket_id', null);
+                                $set('parameter', []);
+                                $set('mode_parameter', true);
+
+                                // 4. Notifikasi
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Parameter & Data Proses Berhasil Direset')
+                                    ->success()
+                                    ->send();
+                            })
+                            ->visible(fn ($record) => $record !== null) // Hanya muncul di edit/view, bukan create
+                    ])->columnSpan(1)->alignCenter(),
+
                     // Pilihan Mode Parameter (Manual / Paket)
-            Radio::make('mode_parameter')
-                ->label('Pilih Parameter')
-                ->options([
-                    true => 'Manual Parameter',
-                    false => 'Paket Parameter',
-                ])
-                ->descriptions([
-                    'true' => 'Pilih Parameter Satu per satu',
-                    'false' => 'Paket Parameter siap pakai',
-                ])
-                ->inline(false)
-                ->live()
-                ->dehydrated(false) // tetap boleh false jika tidak mau disimpan
-                ->afterStateHydrated(function (Set $set, $record) {
-                    if ($record) {
-                        $set('mode_parameter', is_null($record->paket_id));
-                    } else {
-                        $set('mode_parameter', true);
-                    }
-                })
-                ->afterStateUpdated(function (bool $state, Set $set, $record) {
-                    if ($state) { // Manual
-                        $set('paket_id', null);
-                    } else { // Paket
-                        $set('parameter', null);
-                    }
-                }),
+                    Radio::make('mode_parameter')
+                        ->label('Pilih Parameter')
+                        ->options([
+                            'manual' => 'Manual Parameter',
+                            'paket' => 'Paket Parameter',
+                        ])
+                        ->live()
+                        ->columnSpan(2)
+                        ->dehydrated(false) // tetap boleh false jika tidak mau disimpan
+                        ->afterStateHydrated(function (Set $set, $record) {
+                            if ($record && !is_null($record->paket_id)) {
+                                $set('mode_parameter', 'paket');
+                            } else {
+                                $set('mode_parameter', 'manual');
+                            }
+                        })
+                        ->afterStateUpdated(function ($state, Set $set, $record) {
+                            if ($state === 'manual') { 
+                                $set('paket_id', null);
+                            } else { 
+                                $set('parameter', null);
+                            }
+                        }),
 
+                    // Paket Parameter Option
+                    Select::make('paket_id')
+                        ->label('Paket Parameter')
+                        ->options(function (Get $get) {
+                            $regulasiId = $get('regulasi_id');
+                            return $regulasiId
+                                ? \App\Models\PaketParameter::where('id_regulasi', $regulasiId)
+                                    ->pluck('nama_paket', 'id')
+                                : [];
+                        })
+                        ->visible(fn (Get $get) => $get('mode_parameter') === 'paket')
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->prefixIcon('heroicon-o-cube')
+                        ->afterStateUpdated(function ($state, Set $set, $record) {
+                            if (!empty($state)) {
+                                $set('parameter', null);
+                                $set('mode_parameter', 'paket');
+                            }
+                        })
+                        ->extraAttributes(fn (Get $get) => [
+                            'title' => 'Paket: ' . (\App\Models\PaketParameter::find($get('paket_id'))?->nama_paket ?: '-'),
+                        ])
+                        ->columnSpan(2),
 
-                                // Paket Parameter Option
-                                Select::make('paket_id')
-                                    ->label('Paket Parameter')
-                                    ->options(function (Get $get) {
-                                        $regulasiId = $get('regulasi_id');
-                                        return $regulasiId
-                                            ? \App\Models\PaketParameter::where('id_regulasi', $regulasiId)
-                                                ->pluck('nama_paket', 'id')
-                                            : [];
-                                    })
-                                    ->visible(fn (Get $get) => !$get('mode_parameter'))
-                                    // ->required(fn (Get $get) => !$get('mode_parameter'))
-                                    ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->prefixIcon('heroicon-o-cube')
-                ->afterStateUpdated(function ($state, Set $set, $record) {
-                    if (!empty($state)) {
-                        $set('parameter', null);
-                        $set('mode_parameter', false);
-                    }
-                })
-                                    ->extraAttributes(fn (Get $get) => [
-                                        'title' => 'Paket: ' . (\App\Models\PaketParameter::find($get('paket_id'))?->nama_paket ?: '-'),
-                                    ])
-                                    ->columnSpan(1),
+                    // Detail Paket (List Parameter & Total Harga)
+                    Placeholder::make('paket_detail')
+                        ->label('Detail Paket')
+                        ->visible(fn (Get $get) => $get('mode_parameter') === 'paket' && $get('paket_id'))
+                        ->content(function (Get $get) {
+                            $paketId = $get('paket_id');
+                            if (!$paketId) return '';
 
-                                // Detail Paket (List Parameter & Total Harga)
-                                Placeholder::make('paket_detail')
-                                    ->label('Detail Paket')
-                                    ->visible(fn (Get $get) => !$get('mode_parameter') && $get('paket_id'))
-                                    ->content(function (Get $get) {
-                                        $paketId = $get('paket_id');
-                                        if (!$paketId) return '';
+                            $paket = \App\Models\PaketParameter::find($paketId);
+                            if (!$paket) return '';
 
-                                        $paket = \App\Models\PaketParameter::find($paketId);
-                                        if (!$paket) return '';
+                            $parameterIds = is_string($paket->parameter)
+                                ? json_decode($paket->parameter, true)
+                                : $paket->parameter;
 
-                                        $parameterIds = is_string($paket->parameter)
-                                            ? json_decode($paket->parameter, true)
-                                            : $paket->parameter;
+                            if (empty($parameterIds) || $parameterIds === '[]') {
+                                return new \Illuminate\Support\HtmlString('
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                        Tidak ada parameter dalam paket ini
+                                    </div>
+                                ');
+                            }
 
-                                        if (empty($parameterIds) || $parameterIds === '[]') {
-                                            return new \Illuminate\Support\HtmlString('
-                                                <div class="text-sm text-gray-600 dark:text-gray-400">
-                                                    Tidak ada parameter dalam paket ini
-                                                </div>
-                                            ');
-                                        }
+                            $parameters = \App\Models\ParameterLingkungan::whereIn('id', $parameterIds)->get();
 
-                                        $parameters = \App\Models\ParameterLingkungan::whereIn('id', $parameterIds)->get();
+                            // ✅ List 2 kolom
+                            $list = '<ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300"
+                                style="columns:2; column-gap:2rem; -webkit-columns:2; -moz-columns:2;">';
+                            foreach ($parameters as $param) {
+                                $list .= '<li>' . e($param->nama_parameter) . '</li>';
+                            }
+                            $list .= '</ul>';
 
-                                        // ✅ Perbaikan: list jadi 2 kolom rapi (dengan inline CSS agar tidak ditimpa Filament)
-                                        $list = '<ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300"
-                                            style="columns:2; column-gap:2rem; -webkit-columns:2; -moz-columns:2;">';
-                                        foreach ($parameters as $param) {
-                                            $list .= '<li>' . e($param->nama_parameter) . '</li>';
-                                        }
-                                        $list .= '</ul>';
+                            $totalHarga = number_format($paket->total_harga ?? 0, 0, ',', '.');
 
-                                        $totalHarga = number_format($paket->total_harga ?? 0, 0, ',', '.');
+                            return new \Illuminate\Support\HtmlString('
+                                <div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div class="font-medium text-sm text-gray-700 dark:text-gray-300">
+                                        Parameter dalam paket:
+                                    </div>
+                                    ' . $list . '
+                                    <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                                        <span class="font-semibold text-primary-600 dark:text-primary-400">
+                                            Total Harga: Rp ' . $totalHarga . '
+                                        </span>
+                                    </div>
+                                </div>
+                            ');
+                        })
+                        ->columnSpan(3),
 
-                                        return new \Illuminate\Support\HtmlString('
-                                            <div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                                <div class="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                                    Parameter dalam paket:
-                                                </div>
-                                                ' . $list . '
-                                                <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                                                    <span class="font-semibold text-primary-600 dark:text-primary-400">
-                                                        Total Harga: Rp ' . $totalHarga . '
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ');
-                                    })
-                                    ->columnSpan(2),
+                    // Manual Parameter Option
+                    Select::make('parameter')
+                        ->label('Parameter Pengujian')
+                        ->multiple()
+                        ->searchable()
+                        ->visible(fn (Get $get) => $get('mode_parameter') === 'manual')
+                        ->options(function (Get $get, $record = null) {
+                            $id = $get('regulasi_id') ?? $record?->regulasi_id;
+                            return $id
+                                ? \App\Models\ParameterLingkungan::where('id_regulasi', $id)
+                                    ->pluck('nama_parameter', 'id')
+                                    ->toArray()
+                                : [];
+                        })
+                        ->live()
+                        ->prefixIcon('heroicon-o-list-bullet')
+                        ->afterStateUpdated(function ($state, Set $set, $record) {
+                            if (!empty($state)) {
+                                $set('paket_id', null);
+                                $set('mode_parameter', 'manual');
+                            }
+                        })
+                        ->getSearchResultsUsing(function (string $search, Get $get) {
+                            $id = $get('regulasi_id');
+                            return $id
+                                ? \App\Models\ParameterLingkungan::where('id_regulasi', $id)
+                                    ->where('nama_parameter', 'like', "%{$search}%")
+                                    ->limit(20)
+                                    ->pluck('nama_parameter', 'id')
+                                    ->toArray()
+                                : [];
+                        })
+                        ->extraAttributes(fn (Get $get) => [
+                            'title' => 'Parameter: ' . (is_array($get('parameter')) ? count($get('parameter')) . ' dipilih' : '-'),
+                        ])
+                        ->columnSpan(3),
 
-                                    // Manual Parameter Option
-                                    Select::make('parameter')
-                                        ->label('Parameter Pengujian')
-                                        ->multiple()
-                                        ->searchable()
-                                        ->visible(fn (Get $get) => $get('mode_parameter'))
-                                        // ->required(fn (Get $get) => $get('mode_parameter'))
-                                        ->options(function (Get $get, $record = null) {
-                                            $id = $get('regulasi_id') ?? $record?->regulasi_id;
-                                            return $id
-                                                ? \App\Models\ParameterLingkungan::where('id_regulasi', $id)
-                                                    ->pluck('nama_parameter', 'id')
-                                                    ->toArray()
-                                                : [];
-                                        })
-                                        ->live()
-                                        ->prefixIcon('heroicon-o-list-bullet')
-                ->afterStateUpdated(function ($state, Set $set, $record) {
-                    if (!empty($state)) {
-                        $set('paket_id', null);
-                        $set('mode_parameter', true);
-                    }
-                })
-                                        
-                                        ->getSearchResultsUsing(function (string $search, Get $get) {
-                                            $id = $get('regulasi_id');
-                                            return $id
-                                                ? \App\Models\ParameterLingkungan::where('id_regulasi', $id)
-                                                    ->where('nama_parameter', 'like', "%{$search}%")
-                                                    ->limit(20)
-                                                    ->pluck('nama_parameter', 'id')
-                                                    ->toArray()
-                                                : [];
-                                        })
-                                        ->extraAttributes(fn (Get $get) => [
-                                            'title' => 'Parameter: ' . (is_array($get('parameter')) ? count($get('parameter')) . ' dipilih' : '-'),
-                                        ])
-                                        ->columnSpan(2),
-
-                                    // Total Harga Manual
-                                    Placeholder::make('parameter_total')
-                                        ->label('Total Harga')
-                                        ->visible(fn (Get $get) => $get('mode_parameter') && !empty($get('parameter')))
+                    // Total Harga Manual
+                    Placeholder::make('parameter_total')
+                        ->label('Total Harga')
+                        ->visible(fn (Get $get) => $get('mode_parameter') === 'manual' && !empty($get('parameter')))
                                         ->content(function (Get $get) {
                                             $parameterIds = $get('parameter');
                                             if (empty($parameterIds)) return 'Rp 0';

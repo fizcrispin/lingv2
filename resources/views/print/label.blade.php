@@ -5,7 +5,7 @@
     <style>
         @page { size: 50mm 20mm portrait; margin: 0; }
         body { 
-            margin: 0; 
+            margin: 1mm; 
             padding: 0;
             font-family: Arial, sans-serif;
             font-weight: bold;
@@ -15,7 +15,7 @@
         .label { 
             width: 50mm;
             height: 20mm;
-            margin: 0;
+            margin: 1mm;
             padding: 1mm;
             margin-top: -1mm;
             box-sizing: border-box;
