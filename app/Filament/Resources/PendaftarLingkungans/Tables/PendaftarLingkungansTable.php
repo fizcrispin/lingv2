@@ -40,8 +40,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ActionGroup;
 
-
-
 class PendaftarLingkungansTable
 {
     public static function configure(Table $table): Table
@@ -49,7 +47,7 @@ class PendaftarLingkungansTable
    return $table
 
         ->reorderableColumns()
-        ->deferColumnManager(false)
+        ->deferColumnManager(true)
         ->defaultPaginationPageOption(10)
         ->paginated([10, 25, 75, 150, 300])
         ->columns([
@@ -77,6 +75,8 @@ class PendaftarLingkungansTable
                 ->tooltip(fn (\App\Models\PendaftarLingkungan $record) => $record->nama_pengirim)
                 ->width('120px')
                 ->searchable()
+                ->weight(fn ($record) => $record->ekspedisi ? null : 'bold')
+                ->color(fn ($record) => $record->ekspedisi ? null : 'warning')
                 ->extraAttributes([
                     'class' => 'px-1 py-0 text-xs leading-tight',
                 ]),
@@ -148,7 +148,8 @@ class PendaftarLingkungansTable
                     ])
 
                         ->modifyQueryUsing(function ($query) {
-                            $query->whereRaw("no_pendaftar REGEXP '^[0-9]+$'")
+                            $query->with(['ekspedisi'])
+                                ->whereRaw("no_pendaftar REGEXP '^[0-9]+$'")
                                 ->orderByRaw('CAST(no_pendaftar AS UNSIGNED) DESC')
                                 ->orderByDesc('created_at');
                         })
