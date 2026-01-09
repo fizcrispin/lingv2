@@ -2,32 +2,25 @@
 
 namespace App\Exports;
 
-use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use App\Exports\Sheets\DailySheet;
+use App\Exports\Sheets\SummarySheet;
 
-class LaporanExport implements FromView, ShouldAutoSize, WithStyles
+class LaporanExport implements WithMultipleSheets
 {
     protected $data;
 
-    public function __construct(array $data)
+    public function __construct($data)
     {
         $this->data = $data;
     }
 
-    public function view(): View
-    {
-        return view('exports.laporan-excel', $this->data);
-    }
-
-    public function styles(Worksheet $sheet)
+    public function sheets(): array
     {
         return [
-            // Bold header
-            1 => ['font' => ['bold' => true, 'size' => 14]],
-            2 => ['font' => ['bold' => true]],
+            new DailySheet($this->data['start_date'], $this->data['end_date']),
+            new SummarySheet($this->data),
         ];
     }
 }
+

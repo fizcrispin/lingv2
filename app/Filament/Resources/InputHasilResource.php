@@ -438,6 +438,11 @@ class InputHasilResource extends Resource
                     ->tooltip('Cetak Hasil')
                     ->icon('heroicon-o-printer')
                     ->color('success')
+                    ->visible(fn (PendaftarLingkungan $record) => 
+                        $record->ekspedisi?->verifikasi_hasil && 
+                        $record->ekspedisi?->validasi1 && 
+                        $record->ekspedisi?->validasi2
+                    )
                     ->url(fn (PendaftarLingkungan $record) => route('cetak.hasil', $record))
                     ->openUrlInNewTab(),
             ])

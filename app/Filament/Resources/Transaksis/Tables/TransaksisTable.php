@@ -203,7 +203,7 @@ class TransaksisTable
                         return "https://wa.me/{$number}?text={$encodedMessage}";
                     })
                     ->openUrlInNewTab(),
-                Action::make('cetak_invoice')
+                \Filament\Actions\Action::make('cetak_invoice')
                     ->label('Kuitansi')
                     ->tooltip('Cetak Kuitansi Layanan')
                     ->iconButton()
@@ -211,15 +211,6 @@ class TransaksisTable
                     ->color('warning')
                     ->visible(fn ($record) => $record->pendaftar()->exists())
                     ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'kuitansi']))
-                    ->openUrlInNewTab(),
-                Action::make('cetak_kuitansi')
-                    ->label('Bukti Bayar')
-                    ->tooltip('Cetak Bukti Pembayaran / Kuitansi')
-                    ->iconButton()
-                    ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->visible(fn ($record) => $record->status_bayar === 2 && $record->pendaftar()->exists())
-                    ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'bukti_bayar']))
                     ->openUrlInNewTab(),
             ])
             ->actionsPosition(\Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)

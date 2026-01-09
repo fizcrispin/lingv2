@@ -318,11 +318,12 @@ class LaporanPage extends Page implements HasForms
             'total_paid' => $this->total_paid,
             'total_unpaid' => $this->total_unpaid,
             'payment_method_stats' => $this->payment_method_stats,
+            'lab_input_stats' => $this->lab_input_stats,
         ];
 
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\LaporanExport($data), 
-            'Laporan-' . $this->filter_period . '-' . date('Y-m-d') . '.xlsx'
+            'Laporan-Lengkap-' . $this->filter_period . '-' . date('d-m-Y') . '.xlsx'
         );
     }
 }

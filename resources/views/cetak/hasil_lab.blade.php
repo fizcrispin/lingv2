@@ -56,11 +56,26 @@
         th { text-align: center; background-color: white; }
     </style>
 </head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function downloadPDF() {
+            const element = document.getElementById('laporan');
+            const opt = {
+                margin: 0,
+                filename: '{{ $record->no_pendaftar }}-{{ $record->nama_pengirim }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: [215, 330], orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
 </head>
 <body class="bg-gray-100" style="padding: {{ $bodyPadding }}">
     <!-- Buttons -->
     <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
         <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Hasil</button>
+        <button class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 font-sans" onclick="downloadPDF()">Simpan PDF</button>
         <button class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 font-sans" onclick="window.close()">Tutup</button>
     </div>
 

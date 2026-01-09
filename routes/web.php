@@ -13,7 +13,7 @@ Route::get('/login', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/print/label/{id}', function ($id) {
         $record = \App\Models\PendaftarLingkungan::with('jenisSampel')->findOrFail($id);
-        return view('print.label', compact('record'));
+        return view('cetak.label', compact('record')); // Updated view path
     })->name('print.label');
 
     Route::get('/print/{id}/{type}', function ($id, $type) {
@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
         $titles = [
             'faktur' => 'Invoice',
             'kuitansi' => 'Kuitansi',
-            'bukti_bayar' => 'Bukti Pembayaran / Kuitansi',
+            // bukti_bayar removed
         ];
         
         $terbilang = function($x) use (&$terbilang) {
@@ -62,10 +62,10 @@ Route::middleware('auth')->group(function () {
             elseif ($x < 1000000000) return $terbilang($x / 1000000) . " juta" . $terbilang($x % 1000000);
         };
 
-        return view('print.invoice', [
+        return view('cetak.invoice', [ // Updated view path
             'record' => $record,
             'title' => $titles[$type] ?? 'Dokumen Transaksi',
-            'type' => $type, // Pass strict type key
+            'type' => $type, 
             'parameters' => $parameters,
             'terbilang' => ucwords(trim($terbilang($record->total_harga ?? 0))) . " Rupiah",
         ]);

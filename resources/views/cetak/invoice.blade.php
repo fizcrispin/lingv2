@@ -24,7 +24,7 @@
 
         .no-print-wrapper { 
             text-align: center; 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
         }
 
         @media print {
@@ -44,10 +44,25 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function downloadPDF() {
+            const element = document.getElementById('print');
+            const opt = {
+                margin: 10,
+                filename: '{{ $title }}-{{ $record->pendaftar->no_pendaftar }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: [215, 330], orientation: 'portrait',compress: true }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
 </head>
 <body class="bg-gray-100" style="padding: {{ $bodyPadding }}">
     <div class="no-print-wrapper mt-3 flex justify-center gap-4 mb-8 print:hidden">
         <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-sans" onclick="window.print()">Cetak Dokumen</button>
+        <button class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 font-sans" onclick="downloadPDF()">Simpan PDF</button>
         <button class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 font-sans" onclick="window.close()">Tutup</button>
     </div>
 
@@ -231,7 +246,7 @@
                     @endforeach
                     
                     <!-- TOTAL ROW -->
-                    <tr class="border-t-[2px] border-gray-500">
+                    <tr class="border-t-[1px] border-gray-500">
                         <td colspan="3"></td>
                         <td class="py-2 text-right uppercase font-bold">Total</td>
                         <td class="py-2 text-right font-bold text-black border-l-0">
@@ -248,8 +263,7 @@
             <div class="w-7/12 pr-1">
                 <strong class="block text-xs mb-1">Informasi Pembayaran</strong>
                 <p class="text-[11px] leading-snug mb-1">
-                    BANK JATENG No. Rek. <b>1010  0116  60</b><br>
-                    a.n. UPTD LABKESDA KABUPATEN SREGAN<br>
+                    Bank Jateng No. Rek. <b>1010-0116-60 a.n. UPTD Labkesda Sragen</b><br>
                     Format Transfer ditulis pada kolom <b>berita/keterangan</b>:
                 </p>
                 <div class="inline-block p-1 border-[2px] border-dashed border-black bg-white rounded text-xs font-bold px-2 py-1">
