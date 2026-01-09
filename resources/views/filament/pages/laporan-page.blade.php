@@ -122,7 +122,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-white/5 bg-white dark:bg-gray-900">
                             @forelse($payment_method_stats as $method => $count)
                             <tr class="hover:bg-gray-50 dark:hover:bg-white/5">
-                                <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $method ?: 'Lainnya' }}</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $method ?: 'Lainnyaa' }}</td>
                                 <td class="px-4 py-3 font-bold text-right text-gray-950 dark:text-white font-mono tabular-nums">{{ $count }}</td>
                             </tr>
                             @empty
@@ -194,7 +194,7 @@
                 <!-- Parameter Progress -->
                 <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
                     <div class="bg-gray-50 dark:bg-white/5 px-4 py-2 border-b border-gray-200 dark:border-white/10">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Progress Parameter (Top 20)</h3>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Progress Parameter (Semua)</h3>
                     </div>
                     <div class="max-h-96 overflow-y-auto custom-scrollbar">
                         <table class="w-full text-sm text-left divide-y divide-gray-200 dark:divide-white/5">

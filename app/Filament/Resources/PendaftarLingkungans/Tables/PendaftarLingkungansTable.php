@@ -171,7 +171,12 @@ class PendaftarLingkungansTable
                                             $data['sampai_tanggal'],
                                             fn (Builder $query, $date): Builder => $query->whereDate('tanggal_pendaftar', '<=', $date),
                                         );
-                                })
+                                }),
+                            \Filament\Tables\Filters\SelectFilter::make('jenis_sampling')
+                                ->label('Jenis Sampel')
+                                ->relationship('jenisSampel', 'nama_sampel')
+                                ->searchable()
+                                ->preload(),
                         ])
                         ->actions([
                             ActionGroup::make([

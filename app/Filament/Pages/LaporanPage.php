@@ -46,10 +46,13 @@ class LaporanPage extends Page implements HasForms
     public $total_paid = 0;
     public $total_unpaid = 0;
     public $payment_method_stats = [];
+    
+    // Data Lab Input
+    public $lab_input_stats = [];
 
     public function mount()
     {
-        $this->filter_period = 'today';
+        $this->filter_period = 'month';
         $this->updateDates();
         $this->loadData();
     }
@@ -196,14 +199,15 @@ class LaporanPage extends Page implements HasForms
         // Use CLONE of base query
         $pendaftarInRange = $pendaftarQuery->clone()->with(['jenisSampel', 'hasilLingkungans.parameter'])->get();
         
-        // Context B: Input Query (Based on Pendaftar Date Range aka "Jadikan satu saja")
+        // Context B: Input Query (Based on Activity/Tanggal Input)
         $hasilBaseQuery = \App\Models\HasilLingkungan::query()
-            ->whereHas('pendaftar', function($q) use ($start, $end) {
-                $q->whereDate('tanggal_pendaftar', '>=', $start)
-                  ->whereDate('tanggal_pendaftar', '<=', $end);
-            })
+            ->whereDate('tanggal_input', '>=', $start)
+            ->whereDate('tanggal_input', '<=', $end)
             ->whereNotNull('hasil_parameter')
             ->where('hasil_parameter', '!=', '');
+
+        \Illuminate\Support\Facades\Log::info("LaporanPage Debug: Start=$start, End=$end");
+        \Illuminate\Support\Facades\Log::info("LaporanPage Debug: Count=" . $hasilBaseQuery->count());
             
         // STAT: Total Sampel Sudah Input
         $totalSampelInputByActivity = $hasilBaseQuery->clone()->distinct('id_pendaftar')->count('id_pendaftar');
@@ -258,8 +262,8 @@ class LaporanPage extends Page implements HasForms
              'total_parameter_input' => $totalParameterInputByActivity,
              'jenis_sampel_sudah' => $jenisSampelSudahInput,
              'jenis_sampel_belum' => $jenisSampelBelumInput,
-             'parameter_sudah' => array_slice($parameterSudahInput, 0, 20),
-             'parameter_belum' => array_slice($parameterBelumInput, 0, 20),
+             'parameter_sudah' => $parameterSudahInput,
+             'parameter_belum' => $parameterBelumInput,
         ];
 
         // 4. Time Average
@@ -280,11 +284,11 @@ class LaporanPage extends Page implements HasForms
             ->whereDate('tanggal_tagihan', '>=', $start)
             ->whereDate('tanggal_tagihan', '<=', $end);
             
-        $this->total_revenue = $invQuery->sum('total_bayar'); 
-        $this->total_paid = $invQuery->where('status_bayar', 2)->count(); 
-        $this->total_unpaid = $invQuery->where('status_bayar', '!=', 2)->count(); 
+        $this->total_revenue = $invQuery->clone()->sum('total_bayar'); 
+        $this->total_paid = $invQuery->clone()->where('status_bayar', 2)->count(); 
+        $this->total_unpaid = $invQuery->clone()->where('status_bayar', '!=', 2)->count(); 
         
-        $this->payment_method_stats = $invQuery->select('metode_pembayaran', DB::raw('count(*) as total'))
+        $this->payment_method_stats = $invQuery->clone()->select('metode_pembayaran', DB::raw('count(*) as total'))
             ->groupBy('metode_pembayaran')
             ->pluck('total', 'metode_pembayaran')
             ->toArray();

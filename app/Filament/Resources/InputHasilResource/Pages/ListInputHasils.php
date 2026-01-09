@@ -63,13 +63,17 @@ class ListInputHasils extends ListRecords
 
     private function getFilteredCount(Builder $query): int
     {
-        $data = $this->tableFilters['tanggal_pendaftar'] ?? [];
-        $start = $data['dari_tanggal'] ?? null;
-        $end = $data['sampai_tanggal'] ?? null;
+        $dateData = $this->tableFilters['tanggal_pendaftar'] ?? [];
+        $start = $dateData['dari_tanggal'] ?? null;
+        $end = $dateData['sampai_tanggal'] ?? null;
+
+        $jenisSampelData = $this->tableFilters['jenis_sampling'] ?? [];
+        $jenisSampelId = $jenisSampelData['value'] ?? null;
 
         return $query
             ->when($start, fn ($q) => $q->whereDate('tanggal_pendaftar', '>=', $start))
             ->when($end, fn ($q) => $q->whereDate('tanggal_pendaftar', '<=', $end))
+            ->when($jenisSampelId, fn ($q) => $q->where('jenis_sampling', $jenisSampelId))
             ->count();
     }
 
