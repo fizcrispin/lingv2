@@ -154,7 +154,24 @@ class PendaftarLingkungansTable
                                 ->orderByDesc('created_at');
                         })
                         ->filters([
-                            //
+                            \Filament\Tables\Filters\Filter::make('tanggal_pendaftar')
+                                ->form([
+                                    \Filament\Forms\Components\DatePicker::make('dari_tanggal')
+                                        ->label('Dari Tanggal'),
+                                    \Filament\Forms\Components\DatePicker::make('sampai_tanggal')
+                                        ->label('Sampai Tanggal'),
+                                ])
+                                ->query(function (Builder $query, array $data): Builder {
+                                    return $query
+                                        ->when(
+                                            $data['dari_tanggal'],
+                                            fn (Builder $query, $date): Builder => $query->whereDate('tanggal_pendaftar', '>=', $date),
+                                        )
+                                        ->when(
+                                            $data['sampai_tanggal'],
+                                            fn (Builder $query, $date): Builder => $query->whereDate('tanggal_pendaftar', '<=', $date),
+                                        );
+                                })
                         ])
                         ->actions([
                             ActionGroup::make([

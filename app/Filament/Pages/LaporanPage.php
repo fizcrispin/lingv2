@@ -126,34 +126,23 @@ class LaporanPage extends Page implements HasForms
             ->whereDate('tanggal_pendaftar', '>=', $start)
             ->whereDate('tanggal_pendaftar', '<=', $end);
         
-        $this->pendaftaran_count = $pendaftarQuery->count();
+        $this->pendaftaran_count = $pendaftarQuery->clone()->count();
         
-        $this->jenis_sampel_stats = $pendaftarQuery->with('jenisSampel')
+        $this->jenis_sampel_stats = $pendaftarQuery->clone()->with('jenisSampel')
             ->get()
             ->groupBy('jenisSampel.nama_sampel')
             ->map->count()
             ->toArray();
 
-        // Parameter stats (agak berat jika banyak data, kita ambil top 10 parameter)
-        // Parameter disimpan sebagai JSON ID di beberapa kasus atau relasi. 
-        // Asumsi: kita pakai relasi results atau logic sederhana. 
-        // Untuk performa, kita skip deep parameter filtering kecuali diminta detail. 
-        // User minta "pendaftaran(jumlah,jenis sampel,parameter)"
-        // Kita hitung parameter frekuensi dari HasilLingkungan yang terkait pendaftar range ini?
-        // Atau parse kolom 'parameter' (json).
-        
-        // Pendekatan Query Parameter (JSON Parsing MySQL 5.7+ support or fetching all)
-        // Kita ambil semua pendaftar di range ini, loop parameter attributes.
+        // Parameter stats calculation using Chunk on a CLONED query to avoid messing up main query
         $allParams = [];
-        $pendaftarQuery->chunk(100, function($pendaftars) use (&$allParams) {
+        $pendaftarQuery->clone()->chunk(100, function($pendaftars) use (&$allParams) {
             foreach($pendaftars as $p) {
                 if ($p->mode_parameter) { // Manual
-                     $params = $p->parameter ?? []; // array cast check model
+                     $params = $p->parameter ?? []; 
                 } else { // Paket
-                     $params = $p->paket?->parameter ?? []; // paket parameter IDs
+                     $params = $p->paket?->parameter ?? []; 
                 }
-                
-                // Ensure array
                 if (is_string($params)) $params = json_decode($params, true) ?? [];
                 
                 foreach($params as $pid) {
@@ -161,12 +150,9 @@ class LaporanPage extends Page implements HasForms
                 }
             }
         });
-        // Sort and get names
         arsort($allParams);
-        // $topParams = array_slice($allParams, 0, 10, true); // Removed limit
-        
+
         $paramNames = \App\Models\ParameterLingkungan::whereIn('id', array_keys($allParams))->pluck('nama_parameter', 'id');
-        
         $this->parameter_stats = [];
         foreach($allParams as $pid => $count) {
              if(isset($paramNames[$pid])) {
@@ -175,37 +161,108 @@ class LaporanPage extends Page implements HasForms
         }
 
 
-        // 2. Ekspedisi
-        // Selisih waktu dari pendaftaran -> verifikasi hasil?
-        // Ekspedisi linked to Pendaftar (no_pendaftar).
-        // Kita ambil Ekspedisi yang TERKAIT pendaftar di periode ini, ATAU Ekspedisi yang created_at di periode ini?
-        // Usually reports are based on Registration Date or Activity Date. Let's use Registration Date as base.
-        $ekspedisiQuery = Ekspedisi::query()
+        // 2. Ekspedisi Stats
+        $ekspedisiData = Ekspedisi::query()
             ->whereHas('pendaftarLingkungan', function($q) use ($start, $end) {
                 $q->whereDate('tanggal_pendaftar', '>=', $start)
                   ->whereDate('tanggal_pendaftar', '<=', $end);
-            });
-
-        $ekspedisiData = $ekspedisiQuery->with('pendaftarLingkungan')->get();
+            })
+            ->with(['pendaftarLingkungan.hasilLingkungans'])
+            ->get();
 
         $this->ekspedisi_stats = [
-            'Diterima' => $ekspedisiData->where('sampel_diterima', true)->count(),
-            'Verifikasi' => $ekspedisiData->where('verifikasi_hasil', true)->count(),
-            'Selesai' => $ekspedisiData->where('validasi2', true)->count(), // Validasi 2 assumes Selesai
-            'Dimusnahkan' => $ekspedisiData->where('sampel_dimusnahkan', true)->count(),
+            'Belum Diterima' => $ekspedisiData->where('sampel_diterima', 0)->count(),
+            'Sudah Diterima' => $ekspedisiData->where('sampel_diterima', 1)->count(),
+            'Verifikasi Hasil' => $ekspedisiData->where('verifikasi_hasil', 1)->count(),
+            'Validasi 1' => $ekspedisiData->where('validasi1', 1)->count(),
+            'Validasi 2' => $ekspedisiData->where('validasi2', 1)->count(),
+            'Dimusnahkan' => $ekspedisiData->where('sampel_dimusnahkan', 1)->count(),
+        ];
+        
+        // "Selesai Input" Logic
+        $selesaiInputCount = 0;
+        foreach($ekspedisiData as $eks) {
+             $results = $eks->pendaftarLingkungan->hasilLingkungans ?? collect([]);
+             if ($results->isNotEmpty() && $results->every(fn($r) => !empty($r->hasil_parameter))) {
+                 $selesaiInputCount++;
+             }
+        }
+        $this->ekspedisi_stats['Selesai Input'] = $selesaiInputCount;
+
+
+        // 3. Lab Input Stats
+        
+        // Context A: Pendaftar in Date Range (For "Belum" counts)
+        // Use CLONE of base query
+        $pendaftarInRange = $pendaftarQuery->clone()->with(['jenisSampel', 'hasilLingkungans.parameter'])->get();
+        
+        // Context B: Input Query (Based on Pendaftar Date Range aka "Jadikan satu saja")
+        $hasilBaseQuery = \App\Models\HasilLingkungan::query()
+            ->whereHas('pendaftar', function($q) use ($start, $end) {
+                $q->whereDate('tanggal_pendaftar', '>=', $start)
+                  ->whereDate('tanggal_pendaftar', '<=', $end);
+            })
+            ->whereNotNull('hasil_parameter')
+            ->where('hasil_parameter', '!=', '');
+            
+        // STAT: Total Sampel Sudah Input
+        $totalSampelInputByActivity = $hasilBaseQuery->clone()->distinct('id_pendaftar')->count('id_pendaftar');
+        
+        // STAT: Total Parameter Sudah Input
+        $totalParameterInputByActivity = $hasilBaseQuery->clone()->count();
+
+        // STAT: Jenis Sampel - Sudah Input
+        $jenisSampelSudahInput = $hasilBaseQuery->clone()->with('pendaftar.jenisSampel')
+            ->get()
+            ->groupBy(fn($item) => $item->pendaftar?->jenisSampel?->nama_sampel ?? 'Lainnya')
+            ->map->count()
+            ->toArray();
+            
+        // STAT: Jenis Sampel - Belum Input
+        $jenisSampelBelumInput = [];
+        foreach($pendaftarInRange as $p) {
+            // Count pending items: NULL or Empty String
+            $pendingCount = $p->hasilLingkungans->filter(function ($value) {
+                return empty($value->hasil_parameter);
+            })->count();
+
+            if ($pendingCount > 0) {
+                 $k = $p->jenisSampel?->nama_sampel ?? 'Lainnya';
+                 $jenisSampelBelumInput[$k] = ($jenisSampelBelumInput[$k] ?? 0) + 1;
+            }
+        }
+
+        // STAT: Parameter - Sudah Input
+        $parameterSudahInput = $hasilBaseQuery->clone()->with('parameter') 
+            ->get()
+            ->groupBy(fn($item) => $item->parameter?->nama_parameter ?? 'Unknown') 
+            ->map->count()
+            ->toArray();
+
+        // STAT: Parameter - Belum Input
+        $parameterBelumInput = [];
+         foreach($pendaftarInRange as $p) {
+            foreach($p->hasilLingkungans as $hl) {
+                if (empty($hl->hasil_parameter)) {
+                     $pName = $hl->parameter?->nama_parameter ?? $hl->nama_parameter ?? 'Unknown';
+                     $parameterBelumInput[$pName] = ($parameterBelumInput[$pName] ?? 0) + 1;
+                }
+            }
+        }
+        arsort($parameterSudahInput);
+        arsort($parameterBelumInput);
+
+        // Assign to view vars
+        $this->lab_input_stats = [
+             'total_sampel_input' => $totalSampelInputByActivity,
+             'total_parameter_input' => $totalParameterInputByActivity,
+             'jenis_sampel_sudah' => $jenisSampelSudahInput,
+             'jenis_sampel_belum' => $jenisSampelBelumInput,
+             'parameter_sudah' => array_slice($parameterSudahInput, 0, 20),
+             'parameter_belum' => array_slice($parameterBelumInput, 0, 20),
         ];
 
-        // Calc Avg Time (Pendaftar Created -> Verif Hasil Updated?)
-        // Verif hasil is boolean toggle. We don't have timestamp for verification toggle unless audits enabled.
-        // We have `tanggal_diterima` (datetime).
-        // User asked "Selisih waktu dari pendaftaran hingga verif hasil". 
-        // If we don't store Verif Date, we can't calc accurately. 
-        // We do store `updated_at`. If verif is last step... 
-        // Let's rely on `tanggal_diterima` - `tanggal_pendaftar` as "Response Time" for now or use `created_at` invoice?
-        // User specific request: "Selisih waktu dari pendaftaran hingga verif hasil"
-        // Without a specific "datetime_verifikasi" column, we can't do this 100%. 
-        // I'll calculate `tanggal_diterima` - `created_at` (Pendaftaran) as a proxy for "TAT Penerimaan".
-        
+        // 4. Time Average
         $totalDiff = 0;
         $countDiff = 0;
         foreach($ekspedisiData as $eks) {
@@ -218,15 +275,14 @@ class LaporanPage extends Page implements HasForms
         }
         $this->avg_verifikasi_time = $countDiff > 0 ? round($totalDiff / $countDiff, 1) . ' Jam' : '-';
 
-
-        // 3. Transaksi
+        // 5. Transaksi
         $invQuery = InvoiceLingkungan::query()
             ->whereDate('tanggal_tagihan', '>=', $start)
             ->whereDate('tanggal_tagihan', '<=', $end);
             
-        $this->total_revenue = $invQuery->sum('total_bayar'); // Yang sudah dibayar real
-        $this->total_paid = $invQuery->where('status_bayar', 2)->count(); // Lunas
-        $this->total_unpaid = $invQuery->where('status_bayar', '!=', 2)->count(); // Belum Lunas
+        $this->total_revenue = $invQuery->sum('total_bayar'); 
+        $this->total_paid = $invQuery->where('status_bayar', 2)->count(); 
+        $this->total_unpaid = $invQuery->where('status_bayar', '!=', 2)->count(); 
         
         $this->payment_method_stats = $invQuery->select('metode_pembayaran', DB::raw('count(*) as total'))
             ->groupBy('metode_pembayaran')
