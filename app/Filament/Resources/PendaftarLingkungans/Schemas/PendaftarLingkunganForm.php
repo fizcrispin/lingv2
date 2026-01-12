@@ -184,11 +184,11 @@ class PendaftarLingkunganForm
 
                     TimePicker::make('waktu_sampling')
                         ->label('Waktu Sampling')
-                        ->default('00:00')          // 👈 default jam 00:00
+                        ->default('--:--')          // 👈 default jam 00:00
                         ->seconds(false)            // 👈 hanya jam & menit
                         ->format('H:i')             // 👈 24 jam (16:40)
                         ->extraAttributes(fn (Get $get) => [
-                            'title' => 'Waktu: ' . ($get('waktu_sampling') ?? '00:00'),
+                            'title' => 'Waktu: ' . ($get('waktu_sampling') ?? '--:--'),
                         ]),
 
                 ]),

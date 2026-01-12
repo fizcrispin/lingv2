@@ -272,7 +272,29 @@ class EkspedisiResource extends Resource
                                 fn (Builder $sq, $date) => $sq->whereDate('tanggal_pendaftar', '<=', $date),
                             );
                         });
-                    })
+                    }),
+                \Filament\Tables\Filters\Filter::make('belum_input')
+                    ->label('Belum Input Hasil')
+                    ->query(fn (Builder $query): Builder => $query->whereHas('pendaftarLingkungan', fn ($q) => $q->doesntHave('hasilLingkungans'))),
+                \Filament\Tables\Filters\Filter::make('belum_verif')
+                    ->label('Belum Verifikasi')
+                    ->query(fn (Builder $query): Builder => $query->where('verifikasi_hasil', false)),
+                \Filament\Tables\Filters\Filter::make('belum_valid1')
+                    ->label('Belum Validasi 1')
+                    ->query(fn (Builder $query): Builder => $query->where('validasi1', false)),
+                \Filament\Tables\Filters\Filter::make('belum_valid2')
+                    ->label('Belum Validasi 2')
+                    ->query(fn (Builder $query): Builder => $query->where('validasi2', false)),
+                \Filament\Tables\Filters\Filter::make('belum_selesai')
+                    ->label('Belum Selesai')
+                    ->query(fn (Builder $query): Builder => $query->where(function ($q) {
+                        $q->where('verifikasi_hasil', false)
+                          ->orWhere('validasi1', false)
+                          ->orWhere('validasi2', false);
+                    })),
+                \Filament\Tables\Filters\Filter::make('belum_dimusnahkan')
+                    ->label('Belum Dimusnahkan')
+                    ->query(fn (Builder $query): Builder => $query->where('sampel_dimusnahkan', false)),
             ])
             ->actions([
                 // Actions attached to columns

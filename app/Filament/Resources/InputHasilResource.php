@@ -105,6 +105,15 @@ class InputHasilResource extends Resource
                     ->relationship('jenisSampel', 'nama_sampel')
                     ->searchable()
                     ->preload(),
+                \Filament\Tables\Filters\Filter::make('belum_dicetak')
+                    ->label('Belum Dicetak')
+                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave('statusData', fn ($q) => $q->where('dicetak', true))),
+                \Filament\Tables\Filters\Filter::make('belum_notif')
+                    ->label('Belum Notif')
+                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave('statusData', fn ($q) => $q->where('notifikasi', '1'))),
+                \Filament\Tables\Filters\Filter::make('belum_diambil')
+                    ->label('Belum Diambil')
+                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave('statusData', fn ($q) => $q->where('diambil', true))),
             ])
             ->actionsPosition(\Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)
             ->actions([

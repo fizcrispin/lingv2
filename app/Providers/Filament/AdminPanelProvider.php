@@ -53,6 +53,10 @@ class AdminPanelProvider extends PanelProvider
                 'panels::head.end',
                 fn () => \Illuminate\Support\Facades\Blade::render('@vite("resources/css/app.css")')
             )
+            ->renderHook(
+                'panels::body.end',
+                fn () => view('filament.hooks.cbox-js')
+            )
             ->font('Inter')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -75,6 +79,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            
             ->authMiddleware([
                 Authenticate::class,
             ]);
