@@ -136,7 +136,7 @@
                     @foreach($records as $index => $row)
                     <tr class="border-b border-b-[0.1px] border-gray-400">
                         <td class="py-1 text-center">{{ $index + 1 }}</td>
-                        <td class="py-1 ">{{ $row->pendaftar->titik_sampling }}</td>
+                        <td class="py-1 ">{{ $row->pendaftar->no_pendaftar . ' - ' . $row->pendaftar->titik_sampling }}</td>
                         <td class="py-1 text-center">1</td>
                         <td class="py-1 text-right">{{ number_format($row->total_harga, 0, ',', '.') }}</td>
                         <td class="py-1 text-right">{{ number_format($row->total_harga, 0, ',', '.') }}</td>
@@ -177,7 +177,7 @@
             <!-- Signature -->
             <div class="w-5/12 flex flex-col justify-end items-center text-center">
                 <div class="mb-12 text-xs">
-                    <span>Sragen, {{ now()->locale('id')->translatedFormat('d F Y') }}</span><br>
+                    <span>Sragen, {{ $first->tanggal_tagihan ? $first->tanggal_tagihan->locale('id')->translatedFormat('d F Y') : now()->locale('id')->translatedFormat('d F Y') }}</span><br>
                     <span>Penerima</span>
                 </div>
                 <div class="w-40 border-b border-black pb-1 text-xs">

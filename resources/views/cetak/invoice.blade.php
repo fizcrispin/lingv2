@@ -278,7 +278,7 @@
             <!-- Signature -->
             <div class="w-5/12 flex flex-col justify-end items-center text-center">
                 <div class="mb-12 text-xs">
-                    <span>Sragen, {{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->locale('id')->translatedFormat('d F Y') : now()->locale('id')->translatedFormat('d F Y') }}</span><br>
+                    <span>Sragen, {{ $record->tanggal_tagihan ? $record->tanggal_tagihan->locale('id')->translatedFormat('d F Y') : now()->locale('id')->translatedFormat('d F Y') }}</span><br>
                     <span>Penerima</span>
                 </div>
                 <div class="w-40 border-b border-black pb-1 text-xs">

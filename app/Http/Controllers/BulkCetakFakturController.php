@@ -21,7 +21,11 @@ class BulkCetakFakturController extends Controller
         // 2. Fetch Records with Relationships
         $records = InvoiceLingkungan::with('pendaftar.paket', 'pendaftar.jenisSampel')
             ->whereIn('id', $ids)
-            ->get();
+            ->get()
+            ->sortBy(function($query) {
+                return (int) $query->pendaftar->no_pendaftar;
+            })
+            ->values();
 
         if ($records->isEmpty()) {
             abort(404, 'Records not found');
