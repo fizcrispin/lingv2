@@ -58,8 +58,10 @@ class PendaftarLingkungansTable
                 ->label('No')
                 ->searchable()
                 ->sortable()
-                ->width('120px')
-                ->weight('bold'),
+                ->weight('bold')
+                ->extraAttributes([
+                    'style' => 'width: 50px;',
+                ]),
                     
             TextColumn::make('tanggal_pendaftar')
                 ->label('Tgl. Daftar')
@@ -67,13 +69,14 @@ class PendaftarLingkungansTable
                 ->sortable()
                 ->extraAttributes([
                     'class' => 'px-1 py-0 text-xs leading-tight',
+                    // 'style' => 'width: 50px;',
                 ]),
 
             TextColumn::make('nama_pengirim')
                 ->label('Nama Pengirim')
                 ->limit(20)
                 ->tooltip(fn (\App\Models\PendaftarLingkungan $record) => $record->nama_pengirim)
-                ->width('120px')
+                // ->width('120px')
                 ->searchable()
                 ->weight(fn ($record) => $record->ekspedisi ? null : 'bold')
                 ->color(fn ($record) => $record->ekspedisi ? null : 'warning')
@@ -98,45 +101,54 @@ class PendaftarLingkungansTable
 
             TextColumn::make('parameter_list')
                 ->label('Parameter')
-                ->toggleable()
-                ->limit(20)
-                ->extraAttributes([
-                    'class' => 'px-1 py-0 text-xs leading-tight',
-                ])
+                ->limit(30)
                 ->tooltip(function (\App\Models\PendaftarLingkungan $record) {
                     $allIds = [];
-                    // 1. Ambil dari kolom parameter (manual)
-                    $manualIds = $record->parameter; 
-                    if (is_array($manualIds)) $allIds = array_merge($allIds, $manualIds);
-
-                    // 2. Ambil dari paket_id
-                    if (!empty($record->paket_id) && $record->paket && is_array($record->paket->parameter)) {
-                        $allIds = array_merge($allIds, $record->paket->parameter);
+                    // 1. Manual
+                    if (!empty($record->parameter)) {
+                        $p = is_array($record->parameter) ? $record->parameter : json_decode($record->parameter, true);
+                        if (is_array($p)) $allIds = array_merge($allIds, $p);
+                    }
+                    // 2. Paket
+                    if ($record->paket_id && $record->paket) {
+                        $pp = $record->paket->parameter;
+                        $pp = is_array($pp) ? $pp : json_decode($pp, true);
+                        if (is_array($pp)) $allIds = array_merge($allIds, $pp);
                     }
                     
+                    $allIds = array_filter(array_unique($allIds));
                     if (empty($allIds)) return '-';
-                    $names = \App\Models\ParameterLingkungan::whereIn('id', array_unique($allIds))->pluck('nama_parameter')->toArray();
-                    return implode(', ', $names);
-                })
-                ->formatStateUsing(function (\App\Models\PendaftarLingkungan $record) {
-                    $allIds = [];
-                    // 1. Ambil dari kolom parameter (manual)
-                    $manualIds = $record->parameter; 
-                    if (is_array($manualIds)) $allIds = array_merge($allIds, $manualIds);
-
-                    // 2. Ambil dari paket_id
-                    if (!empty($record->paket_id) && $record->paket && is_array($record->paket->parameter)) {
-                        $allIds = array_merge($allIds, $record->paket->parameter);
-                    }
-
-                    $allIds = array_unique(array_filter(array_map('intval', $allIds)));
-                    if (empty($allIds)) return '-';
-
-                    $names = \App\Models\ParameterLingkungan::whereIn('id', $allIds)
+                    
+                    return \App\Models\ParameterLingkungan::whereIn('id', $allIds)
                         ->pluck('nama_parameter')
-                        ->toArray();
+                        ->join(', ');
+                })
+                ->wrap()
+                ->color('gray')
+                ->extraAttributes([
+                    'class' => 'px-1 py-0 text-xs leading-tight',
+                    'style' => 'width: 100px;',
+                ])
+                ->state(function (\App\Models\PendaftarLingkungan $record) {
+                    $allIds = [];
+                    // 1. Manual
+                    if (!empty($record->parameter)) {
+                        $p = is_array($record->parameter) ? $record->parameter : json_decode($record->parameter, true);
+                        if (is_array($p)) $allIds = array_merge($allIds, $p);
+                    }
+                    // 2. Paket
+                    if ($record->paket_id && $record->paket) {
+                        $pp = $record->paket->parameter;
+                        $pp = is_array($pp) ? $pp : json_decode($pp, true);
+                        if (is_array($pp)) $allIds = array_merge($allIds, $pp);
+                    }
                     
-                    return empty($names) ? '-' : implode(', ', $names);
+                    $allIds = array_filter(array_unique($allIds));
+                    if (empty($allIds)) return '-';
+                    
+                    return \App\Models\ParameterLingkungan::whereIn('id', $allIds)
+                        ->pluck('nama_parameter')
+                        ->join(', ');
                 }),
                         TextColumn::make('total_harga')
                             ->toggleable()

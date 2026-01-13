@@ -15,7 +15,7 @@ class BulkCetakLabelController extends Controller
                     ->orderByRaw('CAST(no_pendaftar AS UNSIGNED) DESC') // Optional: Order by no_pendaftar
                     ->get();
 
-        return view('print.label_bulk', [
+        return view('cetak.label_bulk', [
             'records' => $records,
         ]);
     }

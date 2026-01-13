@@ -143,79 +143,239 @@ class TransaksisTable
                     ]),
             ])
             ->actions([
-                EditAction::make()
-                    ->iconButton()
-                    ->modalWidth('7xl'),
-                Action::make('cetak_faktur')
-                    ->label('Faktur')
-                    ->tooltip('Cetak Faktur Penagihan')
-                    ->iconButton()
-                    ->icon('heroicon-o-printer')
-                    ->color('info')
-                    ->visible(fn ($record) => $record->pendaftar()->exists())
-                    ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'faktur']))
-                    ->openUrlInNewTab(),
-                Action::make('whatsapp_notif')
-                    ->label('WhatsApp')
-                    ->tooltip('Kirim Notifikasi Tagihan WA')
-                    ->iconButton()
-                    ->icon('heroicon-o-chat-bubble-left-right')
-                    ->color('success')
-                    ->visible(fn ($record) => $record->pendaftar()->exists() && $record->pendaftar->no_hp)
-                    ->url(function ($record) {
-                        $pendaftar = $record->pendaftar;
-                        $number = $pendaftar->no_hp;
-                        
-                        // Format nomor HP (hapus non-digit, ganti 0 di depan dengan 62)
-                        $number = preg_replace('/[^0-9]/', '', $number);
-                        if (substr($number, 0, 1) === '0') {
-                            $number = '62' . substr($number, 1);
-                        }
-
-                        $name = $pendaftar->nama_pengirim;
-                        $jenisSampel = $pendaftar->jenisSampel->nama_sampel ?? '-';
-                        $titikSampling = $pendaftar->titik_sampling; // Asumsi field ini sudah benar
-                        
-                        // Kode Bayar: ymd + no_pendaftar
-                        // Contoh: 2601061
-                        $dateRef = $pendaftar->tanggal_pendaftar ?? now();
-                        if (is_string($dateRef)) {
-                            $dateRef = \Carbon\Carbon::parse($dateRef);
-                        }
-                        $dateCode = $dateRef->format('ymd');
-                        
-                        $kodeBayar = $dateCode . $pendaftar->no_pendaftar; 
-                        
-                        $totalBiaya = 'Rp. ' . number_format($record->total_harga, 0, ',', '.');
-
-                        $message = "===========================\n" .
-                            "Yth Bapak/Ibu {$name}\n\n" .
-                            "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
-                            "Jenis Sampel : {$jenisSampel}\n" .
-                            "Titik Sampling : {$titikSampling}\n" .
-                            "Kode Bayar : {$kodeBayar}\n" .
-                            "Total Biaya : {$totalBiaya}\n\n" .
-                            "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
-                            "Atas Perhatiannya kami ucapkan terima kasih.\n" .
-                            "===========================";
-
-                        $encodedMessage = urlencode($message);
-                        return "https://wa.me/{$number}?text={$encodedMessage}";
-                    })
-                    ->openUrlInNewTab(),
-                \Filament\Actions\Action::make('cetak_invoice')
-                    ->label('Kuitansi')
-                    ->tooltip('Cetak Kuitansi Layanan')
-                    ->iconButton()
-                    ->icon('heroicon-o-document-text')
-                    ->color('warning')
-                    ->visible(fn ($record) => $record->pendaftar()->exists())
-                    ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'kuitansi']))
-                    ->openUrlInNewTab(),
+                \Filament\Actions\ActionGroup::make([
+                    EditAction::make()
+                        ->iconButton()
+                        ->modalWidth('7xl'),
+                    Action::make('cetak_faktur')
+                        ->label('Faktur')
+                        ->tooltip('Cetak Faktur Penagihan')
+                        ->icon('heroicon-o-printer')
+                        ->color('info')
+                        ->visible(fn ($record) => $record->pendaftar()->exists())
+                        ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'faktur']))
+                        ->openUrlInNewTab(),
+                    Action::make('whatsapp_notif')
+                        ->label('WhatsApp')
+                        ->tooltip('Kirim Notifikasi Tagihan WA')
+                        ->icon('heroicon-o-chat-bubble-left-right')
+                        ->color('success')
+                        ->visible(fn ($record) => $record->pendaftar()->exists() && $record->pendaftar->no_hp)
+                        ->url(function ($record) {
+                            $pendaftar = $record->pendaftar;
+                            $number = $pendaftar->no_hp;
+                            
+                            // Format nomor HP (hapus non-digit, ganti 0 di depan dengan 62)
+                            $number = preg_replace('/[^0-9]/', '', $number);
+                            if (substr($number, 0, 1) === '0') {
+                                $number = '62' . substr($number, 1);
+                            }
+    
+                            $name = $pendaftar->nama_pengirim;
+                            $jenisSampel = $pendaftar->jenisSampel->nama_sampel ?? '-';
+                            $titikSampling = $pendaftar->titik_sampling; 
+                            
+                            // Kode Bayar: ymd + no_pendaftar
+                            $dateRef = $pendaftar->tanggal_pendaftar ?? now();
+                            if (is_string($dateRef)) {
+                                $dateRef = \Carbon\Carbon::parse($dateRef);
+                            }
+                            $dateCode = $dateRef->format('ymd');
+                            
+                            $kodeBayar = $dateCode . $pendaftar->no_pendaftar; 
+                            
+                            $totalBiaya = 'Rp. ' . number_format($record->total_harga, 0, ',', '.');
+    
+                            $message = "===========================\n" .
+                                "Yth Bapak/Ibu {$name}\n\n" .
+                                "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
+                                "Jenis Sampel : {$jenisSampel}\n" .
+                                "Titik Sampling : {$titikSampling}\n" .
+                                "Kode Bayar : {$kodeBayar}\n" .
+                                "Total Biaya : {$totalBiaya}\n\n" .
+                                "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
+                                "Atas Perhatiannya kami ucapkan terima kasih.\n" .
+                                "===========================";
+    
+                            $encodedMessage = urlencode($message);
+                            return "https://wa.me/{$number}?text={$encodedMessage}";
+                        })
+                        ->openUrlInNewTab(),
+                    \Filament\Actions\Action::make('cetak_invoice')
+                        ->label('Kuitansi')
+                        ->tooltip('Cetak Kuitansi Layanan')
+                        ->icon('heroicon-o-document-text')
+                        ->color('warning')
+                        ->visible(fn ($record) => $record->pendaftar()->exists())
+                        ->url(fn ($record) => route('print.transaksi', ['id' => $record->id, 'type' => 'kuitansi']))
+                        ->openUrlInNewTab(),
+                ])
+                ->icon('heroicon-m-bars-3')
+                ->tooltip('Menu Aksi'),
             ])
             ->actionsPosition(\Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)
             ->bulkActions([
                 BulkActionGroup::make([
+                    \Filament\Actions\BulkAction::make('bulk_cetak_faktur')
+                        ->label('Cetak Faktur (Gabungan)')
+                        ->icon('heroicon-o-printer')
+                        ->color('info')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire): void {
+                             // Validasi Pengirim Sama
+                             $senders = $records->pluck('pendaftar.nama_pengirim')->unique();
+                             if ($senders->count() > 1) {
+                                 \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Pengirim Berbeda')
+                                     ->body('Harap pilih data dari satu Pengirim yang sama.')
+                                     ->danger()
+                                     ->send();
+                                 return;
+                             }
+                             
+                             // Validasi Jenis Sampel Sama
+                             $sampels = $records->pluck('pendaftar.jenisSampel.id')->unique();
+                             if ($sampels->count() > 1) {
+                                 \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Jenis Sampel Berbeda')
+                                     ->body('Harap pilih data dengan Jenis Sampel yang sama.')
+                                     ->danger()
+                                     ->send();
+                                 return;
+                             }
+                             
+                             $ids = $records->pluck('id')->join(',');
+                             $url = route('cetak.faktur.bulk', ['ids' => $ids]);
+                             
+                             $livewire->js("window.open('$url', '_blank')");
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
+                    \Filament\Actions\BulkAction::make('bulk_cetak_kuitansi')
+                        ->label('Cetak Kuitansi (Gabungan)')
+                        ->icon('heroicon-o-document-text')
+                        ->color('warning')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire): void {
+                             // Validasi Pengirim Sama
+                             $senders = $records->pluck('pendaftar.nama_pengirim')->unique();
+                             if ($senders->count() > 1) {
+                                 \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Pengirim Berbeda')
+                                     ->body('Harap pilih data dari satu Pengirim yang sama.')
+                                     ->danger()
+                                     ->send();
+                                 return;
+                             }
+                             
+                             // Validasi Jenis Sampel Sama
+                             $sampels = $records->pluck('pendaftar.jenisSampel.id')->unique();
+                             if ($sampels->count() > 1) {
+                                 \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Jenis Sampel Berbeda')
+                                     ->body('Harap pilih data dengan Jenis Sampel yang sama.')
+                                     ->danger()
+                                     ->send();
+                                 return;
+                             }
+                             
+                             $ids = $records->pluck('id')->join(',');
+                             $url = route('cetak.kuitansi.bulk', ['ids' => $ids]);
+                             
+                             $livewire->js("window.open('$url', '_blank')");
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                        
+                    \Filament\Actions\BulkAction::make('bulk_wa_tagihan')
+                        ->label('Kirim Tagihan WA (Gabungan)')
+                        ->icon('heroicon-o-chat-bubble-left-right')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire): void {
+                             // 1. Validasi Satu Nomor HP
+                             $phoneNumbers = $records->map(fn($r) => $r->pendaftar?->no_hp)->unique();
+                             
+                             if ($phoneNumbers->count() > 1) {
+                                  \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Nomor HP Berbeda')
+                                     ->body('Pilih transaksi dari satu pemilik yang sama untuk menggabungkan pesan ini.')
+                                     ->danger()
+                                     ->send();
+                                  return;
+                             }
+                             
+                             $rawPhone = $phoneNumbers->first();
+                             if (empty($rawPhone)) {
+                                  \Filament\Notifications\Notification::make()
+                                     ->title('Gagal: Nomor HP Kosong')
+                                     ->danger()
+                                     ->send();
+                                  return;
+                             }
+                             
+                             // Format HP
+                             $number = preg_replace('/[^0-9]/', '', $rawPhone);
+                             if (substr($number, 0, 1) === '0') $number = '62' . substr($number, 1);
+ 
+                             // 2. Agregasi Data
+                             $names = $records->map(fn($r) => $r->pendaftar?->nama_pengirim)->unique()->join(', ');
+                             
+                             $jenisSampels = $records->map(fn($r) => $r->pendaftar?->jenisSampel?->nama_sampel)
+                                 ->filter()
+                                 ->unique()
+                                 ->join(', ');
+                                 
+                             $titikSamplings = $records->map(fn($r) => $r->pendaftar?->titik_sampling)
+                                 ->filter()
+                                 ->values();
+                             $titikList = "";
+                             foreach($titikSamplings as $idx => $ts) {
+                                 $titikList .= ($idx + 1) . ". " . $ts . "\n";
+                             }
+                             
+                             $totalBiaya = $records->sum('total_harga');
+                             
+                             // Kode Bayar: Assume same date prefix, join suffixes
+                             // Logic: Find common date prefix from first record, then list suffixes?
+                             // User Format: 260113"nomor1-nomor2"
+                             // Let's use the Date of the latest/earliest record as prefix?
+                             // Or just use the Date of the Bulk Action (Today)? 
+                             // "260113" looks like YYMMDD of today (13 Jan 2026).
+                             $todayPrefix = date('ymd');
+                             
+                             $suffixes = $records->map(fn($r) => $r->pendaftar?->no_pendaftar)
+                                 ->filter()
+                                 ->map(function($no) {
+                                     // Extract number part if possible? 
+                                     // Assuming no_pendaftar might be just '12', '13'.
+                                     return $no;
+                                 })
+                                 ->join('-');
+                                 
+                             $kodeBayar = $todayPrefix . $suffixes;
+                             
+                             
+                             // 3. Format Pesan
+                             $message = "===========================\n" .
+                             "Yth Bapak/Ibu {$names}\n\n" .
+                             "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
+                             "Jenis Sampel : {$jenisSampels}\n" .
+                             "Titik Sampling : \n{$titikList}" .
+                             "Kode Bayar : {$kodeBayar}\n" .
+                             "Total Biaya : Rp. " . number_format($totalBiaya, 0, ',', '.') . "\n\n" .
+                             "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
+                             "Atas Perhatiannya kami ucapkan terima kasih.\n" .
+                             "===========================";
+ 
+                             $encodedMessage = urlencode($message);
+                             $url = "https://wa.me/{$number}?text={$encodedMessage}";
+                             
+                             \Filament\Notifications\Notification::make()
+                                 ->title('Membuka WhatsApp...')
+                                 ->success()
+                                 ->send();
+                                 
+                             $livewire->js("window.open('$url', '_blank')");
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    
                     \Filament\Actions\BulkAction::make('bulk_edit')
                         ->label('Edit Masal')
                         ->icon('heroicon-o-pencil-square')

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Print Label {{ $record->id }}</title>
+    <title>Label {{ $record->no_pendaftar }}-{{ $record->nama_pengirim }}-{{ $record->titik_sampling }}</title>
     <style>
         @page { size: 50mm 20mm portrait; margin: 0; }
         body { 

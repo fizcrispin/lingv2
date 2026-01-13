@@ -93,6 +93,34 @@ class SummarySheet implements FromArray, WithTitle, WithStyles, ShouldAutoSize, 
             ];
         }
 
+        $rows[] = ['']; // Spacer
+
+        // SECTION 3: EXTRA STATS (Row Dynamic)
+        $rows[] = [
+            '',
+            'DISTRIBUSI JENIS SAMPEL', '', '',
+            'STATISTIK PARAMETER (TOTAL)', '', '',
+        ]; 
+
+        $jenisRows = [];
+        foreach (($d['jenis_sampel_stats'] ?? []) as $k => $v) $jenisRows[] = [$k, $v];
+
+        $paramRows = [];
+        foreach (($d['parameter_stats'] ?? []) as $k => $v) $paramRows[] = [$k, $v];
+
+        $max3 = max(count($jenisRows), count($paramRows));
+
+        for ($i = 0; $i < $max3; $i++) {
+            $j = $jenisRows[$i] ?? ['', ''];
+            $p = $paramRows[$i] ?? ['', ''];
+            
+            $rows[] = [
+                '',
+                $j[0], $j[1], '',
+                $p[0], $p[1], '',
+            ];
+        }
+
         return $rows;
     }
 
@@ -170,9 +198,43 @@ class SummarySheet implements FromArray, WithTitle, WithStyles, ShouldAutoSize, 
                 $e->getColumnDimension('G')->setWidth(2);
                 $e->getColumnDimension('H')->setWidth(25);
                 $e->getColumnDimension('I')->setWidth(15);
+                
+                // 4. Style Section 3 (Extra Stats)
+                // Calculate dynamic start row for Section 3 based on Section 2 data
+                // Section 2 starts at Row 8.
+                // We need to pass the row count to usage, but here in styling we might need to recalculate or store it.
+                // Since registerEvents doesn't easily share state with array(), we'll calculate the row offset again or be dynamic.
+                // However, an easier way is to style "All cells with borders" or specific ranges if we know them.
+                // But for simplicity, let's just Apply borders to the specific Header Row of Section 3 and the data below it.
+                
+                // Finding the "DISTRIBUSI JENIS SAMPEL" header to identify start of Section 3
+                // We can't search easily.
+                // Alternative: Use strict row numbers calculated from data size.
+                $d = $event->getConcernable()->d; // Access data via public property created in constructor
+                
+                $ekspedisiCount = count($d['ekspedisi_stats'] ?? []);
+                $paymentCount = count($d['payment_method_stats'] ?? []);
+                $labRowsCount = 4; // Fixed
+                
+                $sec2Height = max($ekspedisiCount, $paymentCount, $labRowsCount);
+                $sec3HeaderRow = 8 + $sec2Height + 2; // 8 (Start Sec2) + Height + 2 (Spacer)
+                
+                $headers3 = ['B'.$sec3HeaderRow.':C'.$sec3HeaderRow, 'E'.$sec3HeaderRow.':F'.$sec3HeaderRow];
+                foreach($headers3 as $h) {
+                    $e->mergeCells($h);
+                    $e->getStyle($h)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['argb' => 'FF1F2937']],
+                        'borders' => ['bottom' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['argb' => 'FF8B5CF6']]], // Purple border
+                    ]);
+                    $e->getStyle($h)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
             }
         ];
     }
+    
+    // Public property to access data in registerEvents
+    public $d; 
+
     
     // Stub required methods
     public function styles(Worksheet $sheet) { return []; } 

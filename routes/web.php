@@ -76,4 +76,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/cetak/hasil-bulk', App\Http\Controllers\BulkCetakHasilController::class)->name('cetak.hasil.bulk');
     Route::get('/cetak/label-bulk', App\Http\Controllers\BulkCetakLabelController::class)->name('print.label.bulk');
+    Route::get('/cetak/faktur-bulk', App\Http\Controllers\BulkCetakFakturController::class)->name('cetak.faktur.bulk');
+    Route::get('/cetak/kuitansi-bulk', App\Http\Controllers\BulkCetakKuitansiController::class)->name('cetak.kuitansi.bulk');
 });

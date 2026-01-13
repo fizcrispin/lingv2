@@ -137,31 +137,16 @@ class LaporanPage extends Page implements HasForms
             ->map->count()
             ->toArray();
 
-        // Parameter stats calculation using Chunk on a CLONED query to avoid messing up main query
-        $allParams = [];
-        $pendaftarQuery->clone()->chunk(100, function($pendaftars) use (&$allParams) {
-            foreach($pendaftars as $p) {
-                if ($p->mode_parameter) { // Manual
-                     $params = $p->parameter ?? []; 
-                } else { // Paket
-                     $params = $p->paket?->parameter ?? []; 
-                }
-                if (is_string($params)) $params = json_decode($params, true) ?? [];
-                
-                foreach($params as $pid) {
-                    $allParams[$pid] = ($allParams[$pid] ?? 0) + 1;
-                }
-            }
-        });
-        arsort($allParams);
-
-        $paramNames = \App\Models\ParameterLingkungan::whereIn('id', array_keys($allParams))->pluck('nama_parameter', 'id');
-        $this->parameter_stats = [];
-        foreach($allParams as $pid => $count) {
-             if(isset($paramNames[$pid])) {
-                 $this->parameter_stats[$paramNames[$pid]] = $count;
-             }
-        }
+        // Parameter stats calculation using HasilLingkungan to match "Progress Parameter" logic
+        // This ensures the counts are synchronized.
+        $this->parameter_stats = \App\Models\HasilLingkungan::query()
+            ->whereIn('id_pendaftar', $pendaftarQuery->clone()->select('id'))
+            ->join('parameter_lingkungan', 'hasil_lingkungan.id_parameter', '=', 'parameter_lingkungan.id')
+            ->select('parameter_lingkungan.nama_parameter', DB::raw('count(*) as total'))
+            ->groupBy('parameter_lingkungan.nama_parameter')
+            ->orderByDesc('total')
+            ->pluck('total', 'parameter_lingkungan.nama_parameter')
+            ->toArray();
 
 
         // 2. Ekspedisi Stats

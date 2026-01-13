@@ -107,61 +107,61 @@
         <div class="px-2 mb-0 text-[12px]">
             <!-- Row 1: Nomor -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Nomor</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Nomor</span><span>:</span></div>
                 <div class="w-9/12 pl-2">400.7.5./{{ $record->no_pendaftar ?? '-' }}/H/LL/05.3.1/{{ $record->tanggal_pendaftar ? $record->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
             </div>
             
             <!-- Row 2: Nama Register (Nama Pengirim)-->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Nama Register</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Nama Register</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->nama_pengirim }}</div>
             </div>
 
              <!-- Row 3: Alamat -->
              <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Alamat</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Alamat</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->alamat_pengirim }}</div>
             </div>
 
             <!-- Row 4: Jenis Sampel -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Jenis Sampel</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Jenis Sampel</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->jenisSampel->nama_sampel ?? '-' }}</div>
             </div>
 
             <!-- Row 5: Petugas Sampling -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Petugas Sampling</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Petugas Sampling</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->petugas_sampling ?? '-' }}</div>
             </div>
 
              <!-- Row 6: Titik Sampling -->
              <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Titik Sampling</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Titik Sampling</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->titik_sampling ?? '-' }}</div>
             </div>
 
              <!-- Row 7: Alamat Sampling -->
              <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Alamat Sampling</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Alamat Sampling</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->alamat_sampling ?? '-' }}</div>
             </div>
 
             <!-- Row 8: Waktu Sampling -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Waktu Sampling</span><span>:</span></div>
-                <div class="w-9/12 pl-2">{{ $record->tanggal_sampling ? \Carbon\Carbon::parse($record->tanggal_sampling)->locale('id')->translatedFormat('d F Y') : '-' }} {{ $record->waktu_sampling ? 'Pukul ' . $record->waktu_sampling . ' WIB' : '' }}</div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Waktu Sampling</span><span>:</span></div>
+                <div class="w-9/12 pl-2">{{ $record->tanggal_sampling ? \Carbon\Carbon::parse($record->tanggal_sampling)->locale('id')->translatedFormat('d F Y') : '-' }} {{ $record->waktu_sampling ? \Carbon\Carbon::parse($record->waktu_sampling)->format('H.i') . ' WIB' : '' }}</div>
             </div>
 
             <!-- Row 9: Baku Mutu -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Baku Mutu</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Baku Mutu</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->regulasi->nama_regulasi ?? '-' }}</div>
             </div>
 
             <!-- Row 10: Keterangan -->
             <div class="flex mb-0 text-[12px]">
-                <div class="w-3/12 flex justify-between pr-2"><span>Keterangan</span><span>:</span></div>
+                <div class="w-2/12 flex justify-between pr-2"><span>Keterangan</span><span>:</span></div>
                 <div class="w-9/12 pl-2">{{ $record->keterangan ?? '-' }}</div>
             </div>
         </div>

@@ -200,24 +200,24 @@
             <!-- Right Column: Transaksi Info -->
             <div class="w-5/12 px-1 space-y-1">
                 <div class="flex text-xs">
-                    <div class="w-5/12">Nomor</div>
+                    <div class="w-3/12">Nomor</div>
                     <div class="w-1/12 text-center">:</div>
-                    <div class="w-6/12 ">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/F/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
+                    <div class="w-8/12 ">400.7.5./{{ $record->pendaftar->no_pendaftar ?? '-' }}/F/LL/05.3.1/{{ $record->pendaftar->tanggal_pendaftar ? $record->pendaftar->tanggal_pendaftar->format('Y') : now()->format('Y') }}</div>
                 </div>
                 <div class="flex text-xs">
-                    <div class="w-5/12">Jenis Sampel</div>
+                    <div class="w-3/12">Jenis Sampel</div>
                     <div class="w-1/12 text-center">:</div>
-                    <div class="w-6/12">{{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}</div>
+                    <div class="w-8/12">{{ $record->pendaftar->jenisSampel->nama_sampel ?? '-' }}</div>
                 </div>
                 <div class="flex text-xs">
-                    <div class="w-5/12">Titik Sampling</div>
+                    <div class="w-3/12">Titik Sampling</div>
                     <div class="w-1/12 text-center">:</div>
-                    <div class="w-6/12">{{ $record->pendaftar->titik_sampling ?? '-' }}</div>
+                    <div class="w-8/12">{{ $record->pendaftar->titik_sampling ?? '-' }}</div>
                 </div>
                 <div class="flex text-xs">
-                    <div class="w-5/12">Tgl Pendaftaran</div>
+                    <div class="w-3/12">Tgl Daftar</div>
                     <div class="w-1/12 text-center">:</div>
-                    <div class="w-6/12">{{ $record->pendaftar->tanggal_pendaftar ? \Carbon\Carbon::parse($record->pendaftar->tanggal_pendaftar)->format('d-m-Y') : '-' }}</div>
+                    <div class="w-8/12">{{ $record->pendaftar->tanggal_pendaftar ? \Carbon\Carbon::parse($record->pendaftar->tanggal_pendaftar)->format('d-m-Y') : '-' }}</div>
                 </div>
             </div>
         </div>
