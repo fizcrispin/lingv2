@@ -13,6 +13,9 @@ class ParameterLingkungan extends Model
         'id_regulasi',
         'nama_parameter',
         'harga_parameter',
+        'batas_max',
+        'satuan',
+        'metode_pemeriksaan',
 
         // ... kolom lainnya
     ];

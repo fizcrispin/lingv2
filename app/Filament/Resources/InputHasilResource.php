@@ -392,6 +392,22 @@ class InputHasilResource extends Resource
 
                                                 $livewire->js("window.open('$url', '_blank')");
                                             })
+                                            ,
+                                        \Filament\Actions\Action::make('reset_status')
+                                            ->label('Reset Status')
+                                            ->icon('heroicon-o-arrow-path')
+                                            ->color('danger')
+                                            ->requiresConfirmation()
+                                            ->action(function ($record) {
+                                                $record->statusData()->updateOrCreate(
+                                                    ['id_pendaftar' => $record->id],
+                                                    ['notifikasi' => '0']
+                                                );
+                                                \Filament\Notifications\Notification::make()
+                                                    ->title('Status Notifikasi Direset')
+                                                    ->success()
+                                                    ->send();
+                                            })
                                     ])
                                     ->fullWidth(),
                                     \Filament\Forms\Components\Placeholder::make('info_notif')
@@ -465,6 +481,7 @@ class InputHasilResource extends Resource
                 ->tooltip('Menu Aksi'),
             ])
             ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
                 \Filament\Actions\BulkAction::make('cetak_masal')
                     ->label('Cetak Masal')
                     ->icon('heroicon-o-printer')
@@ -472,6 +489,120 @@ class InputHasilResource extends Resource
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire) {
                         $url = route('cetak.hasil.bulk', ['ids' => implode(',', $records->pluck('id')->toArray())]);
                         $livewire->js("window.open('$url', '_blank')");
+                    })
+                    ->deselectRecordsAfterCompletion(),
+                \Filament\Actions\BulkAction::make('atur_notifikasi_bulk')
+                    ->label('Atur Notifikasi WA')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('success')
+                    ->form([
+                         \Filament\Forms\Components\Radio::make('mode')
+                            ->label('Pilih Tindakan')
+                            ->options([
+                                'kirim' => 'Kirim Notifikasi WA (Buka Tab Baru)',
+                                'reset' => 'Reset Status Notifikasi (Jadi Belum Dikirim)',
+                            ])
+                            ->default('kirim')
+                            ->required()
+                            ->descriptions([
+                                'kirim' => 'Akan membuka tab WhatsApp untuk setiap pelanggan terpilih.',
+                                'reset' => 'Gunakan jika pesan gagal terkirim atau ingin mengirim ulang.',
+                            ]),
+                    ])
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data, \Livewire\Component $livewire) {
+                        $mode = $data['mode'];
+
+                        if ($mode === 'reset') {
+                            // Logic Reset
+                            foreach ($records as $record) {
+                                $record->statusData()->updateOrCreate(
+                                    ['id_pendaftar' => $record->id],
+                                    ['notifikasi' => '0']
+                                );
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Status Notifikasi Berhasil Direset')
+                                ->success()
+                                ->send();
+
+                        } else {
+                            // Logic Kirim WA
+                            // 1. Group by Phone Number
+                            $grouped = $records->groupBy(function ($item) {
+                                return $item->no_hp;
+                            });
+
+                            $jsCommands = "";
+                            $countSent = 0;
+                            $countSkipped = 0;
+
+                            foreach ($grouped as $phone => $items) {
+                                if (empty($phone)) {
+                                    $countSkipped += $items->count();
+                                    continue;
+                                }
+
+                                // Clean Phone
+                                $targetPhone = $phone;
+                                if (substr(trim($targetPhone), 0, 1) === '0') {
+                                    $targetPhone = '62' . substr(trim($targetPhone), 1);
+                                }
+
+                                // Mark Notified
+                                foreach ($items as $item) {
+                                    $item->statusData()->updateOrCreate(
+                                        ['id_pendaftar' => $item->id],
+                                        ['notifikasi' => '1']
+                                    );
+                                }
+
+                                // Build Message
+                                $firstItem = $items->first();
+                                $namaPelanggan = $firstItem->nama_pengirim;
+                                
+                                $jenisSampelList = $items->map(fn($i) => $i->jenisSampel->nama_sampel ?? '-')->unique()->implode(', ');
+
+                                $listTitik = "";
+                                $counter = 1;
+                                foreach ($items as $item) {
+                                    $noReg = $item->no_pendaftar;
+                                    $titik = $item->titik_sampling ?? '-';
+                                    $listTitik .= "{$counter}. ({$noReg}) {$titik}\n";
+                                    $counter++;
+                                }
+
+                                $message = "===========================\n" .
+                                           "Yth Bapak/Ibu {$namaPelanggan}\n" .
+                                           "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan bahwa pemeriksaan lab anda telah selesai.\n\n" .
+                                           "Jenis Sampel : {$jenisSampelList}\n" .
+                                           "Titik Sampling : \n" .
+                                           $listTitik . "\n" .
+                                           "Lembar hasil pemeriksaan dapat segera diambil dengan menunjukan bukti pembayaran.\n\n" .
+                                           "Atas Perhatiannya kami ucapkan terima kasih.\n" .
+                                           "===========================";
+
+                                $url = "https://wa.me/{$targetPhone}?text=" . urlencode($message);
+                                $jsCommands .= "window.open('$url', '_blank'); ";
+                                $countSent++;
+                            }
+
+                            if ($countSent > 0) {
+                                 $livewire->js($jsCommands);
+                                 \Filament\Notifications\Notification::make()
+                                    ->title("Proses Kirim WA Berjalan")
+                                    ->body("Membuka {$countSent} tab WhatsApp.")
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if ($countSkipped > 0) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title("Data Diabaikan")
+                                    ->body("{$countSkipped} data tanpa No HP.")
+                                    ->warning()
+                                    ->send();
+                            }
+                        }
                     })
                     ->deselectRecordsAfterCompletion(),
                     
@@ -544,6 +675,7 @@ class InputHasilResource extends Resource
                            ->send();
                     })
                     ->deselectRecordsAfterCompletion(),
+                ]),
             ]);
     }
 

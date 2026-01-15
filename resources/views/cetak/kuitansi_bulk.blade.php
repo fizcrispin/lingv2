@@ -128,7 +128,7 @@
                         Titik Sampling:
                         <ul class="list-decimal pl-4 mt-0.5">
                             @foreach($records as $row)
-                                <li>{{ $row->pendaftar->no_pendaftar . ' - ' . $row->pendaftar->titik_sampling }}</li>
+                                <li>{{ $row->pendaftar->no_pendaftar }} - {{ $row->pendaftar->titik_sampling }} (Rp {{ number_format($row->total_harga, 0, ',', '.') }})</li>
                             @endforeach
                         </ul>
                      </div>

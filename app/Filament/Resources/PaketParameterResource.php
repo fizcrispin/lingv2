@@ -82,9 +82,13 @@ class PaketParameterResource extends Resource
                 Tables\Columns\TextColumn::make('nama_paket')
                     ->label('Nama Paket')
                     ->searchable()
+                    ->limit(25)
+                    ->tooltip(fn ($record) => $record->nama_paket)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('regulasi.nama_regulasi') // Assuming relation name
                     ->label('Regulasi')
+                    ->limit(25)
+                    ->tooltip(fn ($record) => $record->regulasi->nama_regulasi)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_harga')
                     ->label('Total Harga')
@@ -109,8 +113,10 @@ class PaketParameterResource extends Resource
                 //
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()
+                ->label(false),
+                \Filament\Actions\DeleteAction::make()
+                ->label(false),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

@@ -41,6 +41,15 @@ class ParameterLingkunganResource extends Resource
                     ->label('Nama Parameter')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('batas_max')
+                    ->label('Batas Maksimum')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('satuan')
+                    ->label('Satuan')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('metode_pemeriksaan')
+                    ->label('Metode Pemeriksaan')
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('harga_parameter')
                     ->label('Harga')
                     ->numeric()
@@ -58,10 +67,23 @@ class ParameterLingkunganResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('regulasi.nama_regulasi')
                     ->label('Nama Regulasi')
+                    ->limit(25)
+                    ->tooltip(fn ($record) => $record->regulasi->nama_regulasi)
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('kategoriData.nama_kategori') // Model has 'kategoriData' relation
                     ->label('Kategori')
                     ->sortable(), 
+                Tables\Columns\TextColumn::make('batas_max')
+                    ->label('Batas Max')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('satuan')
+                    ->label('Satuan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('metode_pemeriksaan')
+                    ->label('Metode')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true), 
                 Tables\Columns\TextColumn::make('harga_parameter')
                     ->label('Harga')
                     ->money('IDR')
@@ -72,8 +94,10 @@ class ParameterLingkunganResource extends Resource
                      ->options(\App\Models\Kategori::pluck('nama_kategori', 'id')),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()
+                ->label(false),
+                \Filament\Actions\DeleteAction::make()
+                ->label(false),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
