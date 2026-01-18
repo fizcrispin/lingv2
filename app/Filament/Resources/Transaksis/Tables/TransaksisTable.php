@@ -145,8 +145,10 @@ class TransaksisTable
             ->actions([
                 \Filament\Actions\ActionGroup::make([
                     EditAction::make()
-                        ->iconButton()
-                        ->modalWidth('7xl'),
+                        ->icon('heroicon-o-pencil')
+                        ->tooltip('Ubah Data')
+                        ->color('primary')
+                        ->modalWidth('5xl'),
                     Action::make('cetak_faktur')
                         ->label('Faktur')
                         ->tooltip('Cetak Faktur Penagihan')
@@ -191,7 +193,7 @@ class TransaksisTable
                                 "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
                                 "Jenis Sampel : {$jenisSampel}\n" .
                                 "Titik Sampling : {$titikSampling}\n" .
-                                "Kode Bayar : {$kodeBayar}\n" .
+                                // "Kode Bayar : {$kodeBayar}\n" .
                                 "Total Biaya : {$totalBiaya}\n\n" .
                                 "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
                                 "Atas Perhatiannya kami ucapkan terima kasih.\n" .
