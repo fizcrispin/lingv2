@@ -95,7 +95,7 @@
             <div class="flex mb-1 text-xs">
                 <div class="w-3/12 flex justify-between pr-4"><span>Tanggal Pendaftaran</span><span>:</span></div>
                 <div class="w-9/12">
-                     {{ now()->locale('id')->translatedFormat('d F Y') }}
+                     {{ $first->tanggal_bayar ? \Carbon\Carbon::parse($first->tanggal_bayar)->locale('id')->translatedFormat('d F Y') : 'Belum Bayar' }}
                 </div>
             </div>
 

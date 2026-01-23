@@ -487,7 +487,30 @@ class InputHasilResource extends Resource
                     ->icon('heroicon-o-printer')
                     ->color('success')
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records, \Livewire\Component $livewire) {
-                        $url = route('cetak.hasil.bulk', ['ids' => implode(',', $records->pluck('id')->toArray())]);
+                        $validRecords = $records->filter(fn ($record) => 
+                            $record->ekspedisi?->verifikasi_hasil && 
+                            $record->ekspedisi?->validasi1 && 
+                            $record->ekspedisi?->validasi2
+                        );
+
+                        if ($validRecords->isEmpty()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Tidak dapat mencetak')
+                                ->body('Data yang dipilih belum diverifikasi dan divalidasi.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        if ($validRecords->count() !== $records->count()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Perhatian')
+                                ->body('Beberapa data dilewati karena belum diverifikasi dan divalidasi.')
+                                ->warning()
+                                ->send();
+                        }
+
+                        $url = route('cetak.hasil.bulk', ['ids' => implode(',', $validRecords->pluck('id')->toArray())]);
                         $livewire->js("window.open('$url', '_blank')");
                     })
                     ->deselectRecordsAfterCompletion(),
