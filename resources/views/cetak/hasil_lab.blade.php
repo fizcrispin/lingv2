@@ -87,7 +87,7 @@
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Seal_of_Sragen_Regency.svg/250px-Seal_of_Sragen_Regency.svg.png" alt="Logo" class="absolute left-0 top-0 h-[80px] object-contain">
             
             <!-- Right Logo -->
-            <img src="https://labkesjabar.com/assets/img/logokalk.png" alt="Logo" class="absolute right-0 top-0 h-[85px] object-contain">
+            <img src="https://labkes.kabsragen.id/logo-laskesi-paripurna.png" alt="Logo" class="absolute right-0 top-0 h-[85px] object-contain">
 
             <div class="w-full text-center px-24">
                 <h5 class="uppercase font-bold text-[14px] mb-[2px] leading-tight">Pemerintah Kabupaten Sragen</h5>

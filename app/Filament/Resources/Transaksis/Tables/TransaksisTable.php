@@ -360,7 +360,7 @@ class TransaksisTable
                              "Kami dari Laboratorium Kesehatan Kab. Sragen, menyampaikan informasi tagihan pemeriksaan laboratorium.\n\n" .
                              "Jenis Sampel : {$jenisSampels}\n" .
                              "Titik Sampling : \n{$titikList}" .
-                             "Kode Bayar : {$kodeBayar}\n" .
+                            //  "Kode Bayar : {$kodeBayar}\n" .
                              "Total Biaya : Rp. " . number_format($totalBiaya, 0, ',', '.') . "\n\n" .
                              "Pembayaran harap paling lambat 14 hari setelah informasi ini terkirim.\n\n" .
                              "Atas Perhatiannya kami ucapkan terima kasih.\n" .
