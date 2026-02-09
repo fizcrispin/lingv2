@@ -373,6 +373,37 @@ class EkspedisiResource extends Resource
                         })
                         ->deselectRecordsAfterCompletion(),
                 ]),
+            ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename(fn ($resource) => $resource::getModelLabel() . '-' . date('Y-m-d'))
+                            ->withColumns([
+                                \pxlrbt\FilamentExcel\Columns\Column::make('pendaftarLingkungan.no_pendaftar')->heading('No Pendaftar'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('pendaftarLingkungan.nama_pengirim')->heading('Nama Pengirim'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('pendaftarLingkungan.titik_sampling')->heading('Titik Sampling'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('pendaftarLingkungan.tanggal_pendaftar')->heading('Tanggal Daftar'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('sampel_diterima')
+                                    ->heading('Diterima?')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('tanggal_diterima')->heading('Tgl Diterima'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('verifikasi_hasil')
+                                    ->heading('Verifikasi')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Sudah' : 'Belum'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('validasi1')
+                                    ->heading('Validasi 1')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Sudah' : 'Belum'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('validasi2')
+                                    ->heading('Validasi 2')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Sudah' : 'Belum'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('sampel_dimusnahkan')
+                                    ->heading('Dimusnahkan?')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('keterangan'),
+                            ])
+                    ]),
             ]);
     }
 

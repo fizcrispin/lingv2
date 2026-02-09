@@ -11,6 +11,7 @@ class ParameterLingkungan extends Model
         protected $fillable = [
         'id',
         'id_regulasi',
+        'kategori',
         'nama_parameter',
         'harga_parameter',
         'batas_max',
