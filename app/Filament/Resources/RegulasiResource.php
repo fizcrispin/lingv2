@@ -28,10 +28,11 @@ class RegulasiResource extends Resource
     {
         return $schema
             ->components([
-                Forms\Components\TextInput::make('nama_regulasi')
+                Forms\Components\TextArea::make('nama_regulasi')
                     ->label('Nama Regulasi')
                     ->required()
-                    ->maxLength(255),
+                    ->columnSpanFull()
+                    ->maxLength(10000),
             ]);
     }
 
