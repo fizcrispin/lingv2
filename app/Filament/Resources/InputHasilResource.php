@@ -175,8 +175,20 @@ class InputHasilResource extends Resource
                                         ->label('No. Pendaftaran')
                                         ->content($record->no_pendaftar)
                                         ->inlineLabel()
-                                        ->extraAttributes(['style' => 'border-bottom: 1px solid #f1f5f9; padding-bottom: 1px; border-left: 3px solid #3b82f6; padding-left: 8px; font-weight: 700; color: #1d4ed8;']),
-                                    
+                                        ->extraAttributes([
+                                            'style' => '
+                                                top: 0; 
+                                                z-index: 10; 
+                                                background: none; 
+                                                border-bottom: 1px solid #f1f5f9; 
+                                                border-left: 3px solid #3b82f6; 
+                                                padding-left: 8px; 
+                                                padding-top: 10px; 
+                                                padding-bottom: 10px; 
+                                                font-weight: 700; 
+                                                color: #1d4ed8;
+                                            '
+                                        ]),                                    
                                     Forms\Components\Placeholder::make('tgl_pendaftar_display')
                                         ->label('Tanggal Daftar')
                                         ->content($record->tanggal_pendaftar ? \Carbon\Carbon::parse($record->tanggal_pendaftar)->translatedFormat('d F Y') : '-')
@@ -261,7 +273,7 @@ class InputHasilResource extends Resource
                                                 <span style='color: white; font-weight: 700; font-size: 14px;'>{$categoryIndex}</span>
                                             </div>
                                             <div>
-                                                <h4 style='margin: 0; color: white; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;'>{$kategori}</h4>
+                                                <h4 style='margin: 0; color: white; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;'>{$kategori} (No. {$record->no_pendaftar})</h4>
                                             </div>
                                         </div>
                                     "))
@@ -295,6 +307,16 @@ class InputHasilResource extends Resource
                                             ->hiddenLabel()
                                             ->placeholder('—')
                                             ->columnSpan(2)
+                                            ->datalist([
+                                            'Tidak berbau',
+                                            '0',
+                                            '<0.010',
+                                            '<0.05',
+                                            '<0.07',
+                                            '<1',
+                                            '<2',
+                                            '>200',
+                                            ])
                                             ->extraInputAttributes(['style' => 'text-align: center; font-weight: 700; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 4px; height: 28px; font-size: 12px;']),
                                         Forms\Components\Placeholder::make("info_batas_{$item->id}")
                                             ->hiddenLabel()
